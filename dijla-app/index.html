@@ -649,7 +649,7 @@
         <div style="display:flex;align-items:center;gap:12px">
           <div style="height:40px; display:flex; align-items:center; justify-content:center; 
                       border-radius:4px; font-weight:bold; font-size:16px;">
-            <img src="images\dijla.png" style="height:80px;object-fit:contain">
+            <img src="images/dijla.png" alt="شعار شركة دجلة" style="height:80px;object-fit:contain">
           </div>
           <div class="user-controls">
             <button id="backup-data" class="btn btn-primary">نسخ احتياطي</button>
@@ -997,7 +997,7 @@
               </div>
               <div class="form-group date-input">
                 <label for="report-end-date">إلى تاريخ</label>
-                <input type="date" id="report-end-date" class="form-control" value="${new Date().toISOString().split('T')[0]}">
+                <input type="date" id="report-end-date" class="form-control">
               </div>
               <div class="form-group">
                 <label>&nbsp;</label>
@@ -1024,7 +1024,48 @@
     let cart = [];
     let orders = [];
     let currentEditingMedicineId = null;
-    
+
+    // حدود المخزون (مصدر واحد لكل الشاشات والتقارير والتنبيهات)
+    const LOW_STOCK_THRESHOLD = 10;      // أقل من هذا = منخفض
+    const CRITICAL_STOCK_THRESHOLD = 5;  // أقل من هذا = منخفض جداً
+    const isLowStock = p => Number(p.stock) < LOW_STOCK_THRESHOLD;
+
+    // صورة افتراضية محلية (تعمل بدون إنترنت، بديلاً عن via.placeholder.com المتوقفة)
+    const PLACEHOLDER_IMAGE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">' +
+      '<rect width="400" height="300" fill="#e8f4f8"/>' +
+      '<g transform="translate(200 135) rotate(-35)"><rect x="-70" y="-28" width="140" height="56" rx="28" fill="#7fcdbb"/>' +
+      '<path d="M0 -28 H42 A28 28 0 0 1 42 28 H0 Z" fill="#2c7fb8"/></g>' +
+      '<text x="200" y="250" font-family="Tahoma, sans-serif" font-size="26" fill="#2c7fb8" text-anchor="middle">دواء</text></svg>'
+    );
+
+    // حماية من XSS: يجب تمرير أي نص مصدره المستخدم أو البيانات المخزنة عبر هذه الدالة قبل وضعه في HTML
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[ch]));
+    }
+
+    // تاريخ اليوم بالتوقيت المحلي بصيغة YYYY-MM-DD
+    // (toISOString يعطي توقيت UTC فيسجّل تاريخ الأمس بين منتصف الليل والساعة 3 فجراً بتوقيت العراق)
+    function toLocalISODate(d) {
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+    function todayISO() {
+      return toLocalISODate(new Date());
+    }
+
+    function readStoredArray(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || '[]');
+        return Array.isArray(value) ? value : [];
+      } catch (e) {
+        console.error(`بيانات تالفة في ${key}`, e);
+        return [];
+      }
+    }
+
     // نظام صلاحيات المستخدمين
     const userRoles = {
       admin: ['view', 'add', 'edit', 'delete', 'reports', 'backup'],
@@ -1069,22 +1110,65 @@
       // تعيين التاريخ الافتراضي لبداية الشهر
       const startDate = new Date();
       startDate.setDate(1);
-      document.getElementById('report-start-date').value = startDate.toISOString().split('T')[0];
+      document.getElementById('report-start-date').value = toLocalISODate(startDate);
+      document.getElementById('report-end-date').value = todayISO();
     });
 
+    // توحيد شكل السجلات: الأرقام أرقام والنصوص نصوص
+    // (يحمي من بيانات قديمة أو ملف نسخة احتياطية معدَّل يدوياً)
+    const toNumber = v => (Number.isFinite(Number(v)) ? Number(v) : 0);
+    const toText = v => (v == null ? '' : String(v));
+
+    function normalizeItem(item) {
+      return {
+        ...item,
+        id: toNumber(item.id),
+        name: toText(item.name),
+        type: toText(item.type),
+        price: toNumber(item.price),
+        quantity: toNumber(item.quantity)
+      };
+    }
+
+    function normalizeProduct(p) {
+      return {
+        ...p,
+        id: toNumber(p.id),
+        name: toText(p.name),
+        type: toText(p.type),
+        price: toNumber(p.price),
+        stock: toNumber(p.stock),
+        image: toText(p.image)
+      };
+    }
+
+    function normalizeOrder(o) {
+      return {
+        ...o,
+        id: toNumber(o.id),
+        pharmacy: toText(o.pharmacy),
+        notes: toText(o.notes),
+        date: toText(o.date),
+        status: toText(o.status),
+        items: Array.isArray(o.items) ? o.items.filter(i => i && typeof i === 'object').map(normalizeItem) : []
+      };
+    }
+
+    const onlyObjects = arr => (Array.isArray(arr) ? arr.filter(x => x && typeof x === 'object') : []);
+
     function loadDataFromStorage() {
-      products = JSON.parse(localStorage.getItem('products') || '[]');
-      cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      products = onlyObjects(readStoredArray('products')).map(normalizeProduct);
+      cart = onlyObjects(readStoredArray('cart')).map(normalizeItem);
+      orders = onlyObjects(readStoredArray('orders')).map(normalizeOrder);
     }
 
     function initializeSampleData() {
       if (products.length === 0) {
         const sampleProducts = [
-          { id: 1, name: 'باراسيتامول', type: 'حبوب', price: 2500, stock: 50, image: 'https://via.placeholder.com/400x300?text=باراسيتامول' },
-          { id: 2, name: 'أموكسيسيلين', type: 'حبوب', price: 5000, stock: 30, image: 'https://via.placeholder.com/400x300?text=أموكسيسيلين' },
-          { id: 3, name: 'فيتامين سي', type: 'حبوب', price: 3000, stock: 20, image: 'https://via.placeholder.com/400x300?text=فيتامين+سي' },
-          { id: 4, name: 'مرهم مضاد حيوي', type: 'مرهم', price: 7500, stock: 15, image: 'https://via.placeholder.com/400x300?text=مرهم' }
+          { id: 1, name: 'باراسيتامول', type: 'حبوب', price: 2500, stock: 50, image: '' },
+          { id: 2, name: 'أموكسيسيلين', type: 'حبوب', price: 5000, stock: 30, image: '' },
+          { id: 3, name: 'فيتامين سي', type: 'حبوب', price: 3000, stock: 20, image: '' },
+          { id: 4, name: 'مرهم مضاد حيوي', type: 'مرهم', price: 7500, stock: 15, image: '' }
         ];
         products = sampleProducts;
         localStorage.setItem('products', JSON.stringify(products));
@@ -1101,7 +1185,7 @@
               { id: 1, name: 'باراسيتامول', type: 'حبوب', price: 2500, quantity: 2 },
               { id: 3, name: 'فيتامين سي', type: 'حبوب', price: 3000, quantity: 1 }
             ],
-            date: new Date().toISOString().split('T')[0],
+            date: todayISO(),
             status: 'مكتمل'
           },
           {
@@ -1111,7 +1195,7 @@
             items: [
               { id: 2, name: 'أموكسيسيلين', type: 'حبوب', price: 5000, quantity: 3 }
             ],
-            date: new Date().toISOString().split('T')[0],
+            date: todayISO(),
             status: 'معلق'
           }
         ];
@@ -1137,6 +1221,18 @@
           const tabId = this.dataset.tab;
           switchOrdersTab(tabId);
         });
+      });
+
+      // أزرار جداول الطلبات: مستمع واحد مفوَّض (event delegation) يُربط مرة واحدة فقط.
+      // سابقاً كانت كل دالة تحميل تربط مستمعاً على كل الأزرار في الصفحة، فيُنفَّذ "عرض" و"حذف" أكثر من مرة.
+      document.getElementById('orders').addEventListener('click', function(e) {
+        const btn = e.target.closest('button[data-id]');
+        if (!btn) return;
+        const orderId = parseInt(btn.dataset.id, 10);
+        if (btn.classList.contains('complete-order')) completeOrder(orderId);
+        else if (btn.classList.contains('return-order')) returnOrder(orderId);
+        else if (btn.classList.contains('view-order')) viewOrder(orderId);
+        else if (btn.classList.contains('delete-order')) deleteOrder(orderId);
       });
 
       // النماذج
@@ -1171,6 +1267,7 @@
         if (e.target.files.length > 0) {
           restoreData(e.target.files[0]);
         }
+        e.target.value = ''; // للسماح باختيار نفس الملف مرة أخرى
       });
       
       // نظام التقارير
@@ -1240,19 +1337,19 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-          <img class="card-img" src="${normalizeImageUrl(product.image)}" alt="${product.name}">
+          <img class="card-img" src="${escapeHtml(normalizeImageUrl(product.image))}" alt="${escapeHtml(product.name)}">
           <div class="card-body">
-            <div class="card-title">${product.name}</div>
+            <div class="card-title">${escapeHtml(product.name)}</div>
             <div class="card-meta">
-              <div class="card-price">${product.price} د.ع</div>
-              <div class="card-type badge">${product.type || '—'}</div>
+              <div class="card-price">${escapeHtml(product.price)} د.ع</div>
+              <div class="card-type badge">${escapeHtml(product.type || '—')}</div>
             </div>
             <div class="quantity-controls" style="margin-top:10px">
-              <button class="quantity-btn minus" data-id="${product.id}">-</button>
-              <input class="quantity-input" data-id="${product.id}" type="number" value="1" min="1">
-              <button class="quantity-btn plus" data-id="${product.id}">+</button>
+              <button class="quantity-btn minus" data-id="${escapeHtml(product.id)}">-</button>
+              <input class="quantity-input" data-id="${escapeHtml(product.id)}" type="number" value="1" min="1">
+              <button class="quantity-btn plus" data-id="${escapeHtml(product.id)}">+</button>
             </div>
-            <button class="btn btn-primary add-to-cart" data-id="${product.id}" style="width:100%;margin-top:8px">إضافة إلى السلة</button>
+            <button class="btn btn-primary add-to-cart" data-id="${escapeHtml(product.id)}" style="width:100%;margin-top:8px">إضافة إلى السلة</button>
           </div>
         `;
         grid.appendChild(card);
@@ -1315,7 +1412,7 @@
         return;
       }
 
-      let imageUrl = 'https://via.placeholder.com/400x300?text=دواء';
+      let imageUrl = '';
 
       if (imageInput && imageInput.files && imageInput.files[0]) {
         // compress before saving (max 1200x1200, quality 0.75)
@@ -1405,21 +1502,21 @@
         cartItem.className = 'cart-item';
         cartItem.innerHTML = `
           <div class="cart-item-info">
-            <img class="cart-item-img" src="${normalizeImageUrl(productRef.image)}" alt="${item.name}">
+            <img class="cart-item-img" src="${escapeHtml(normalizeImageUrl(productRef.image))}" alt="${escapeHtml(item.name)}">
             <div>
-              <h4>${item.name}</h4>
-              <div>${item.type}</div>
-              <div class="cart-item-price">${itemPrice} د.ع</div>
+              <h4>${escapeHtml(item.name)}</h4>
+              <div>${escapeHtml(item.type)}</div>
+              <div class="cart-item-price">${escapeHtml(itemPrice)} د.ع</div>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:15px">
             <div style="display:flex;align-items:center;gap:10px">
-              <button class="quantity-btn minus-cart" data-id="${item.id}">-</button>
-              <input class="cart-quantity" data-id="${item.id}" type="number" value="${item.quantity}" min="1" style="width:60px">
-              <button class="quantity-btn plus-cart" data-id="${item.id}">+</button>
+              <button class="quantity-btn minus-cart" data-id="${escapeHtml(item.id)}">-</button>
+              <input class="cart-quantity" data-id="${escapeHtml(item.id)}" type="number" value="${escapeHtml(item.quantity)}" min="1" style="width:60px">
+              <button class="quantity-btn plus-cart" data-id="${escapeHtml(item.id)}">+</button>
             </div>
             <div style="font-weight:bold">${itemTotal.toFixed(2)} د.ع</div>
-            <button class="btn btn-danger remove-from-cart" data-id="${item.id}">حذف</button>
+            <button class="btn btn-danger remove-from-cart" data-id="${escapeHtml(item.id)}">حذف</button>
           </div>
         `;
         container.appendChild(cartItem);
@@ -1518,7 +1615,7 @@
         pharmacy: pharmacy,
         notes: notes,
         items: [...cart],
-        date: new Date().toISOString().split('T')[0],
+        date: todayISO(),
         status: 'معلق'
       };
       
@@ -1560,36 +1657,18 @@
         const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.pharmacy}</td>
-          <td>${order.date}</td>
+          <td>${escapeHtml(order.id)}</td>
+          <td>${escapeHtml(order.pharmacy)}</td>
+          <td>${escapeHtml(order.date)}</td>
           <td>${total.toFixed(2)} د.ع</td>
           <td><span class="status-badge status-pending">معلق</span></td>
           <td>
-            <button class="btn btn-success complete-order" data-id="${order.id}">تم التجهيز</button>
-            <button class="btn btn-primary view-order" data-id="${order.id}">عرض</button>
-            <button class="btn btn-danger delete-order" data-id="${order.id}">حذف</button>
+            <button class="btn btn-success complete-order" data-id="${escapeHtml(order.id)}">تم التجهيز</button>
+            <button class="btn btn-primary view-order" data-id="${escapeHtml(order.id)}">عرض</button>
+            <button class="btn btn-danger delete-order" data-id="${escapeHtml(order.id)}">حذف</button>
           </td>
         `;
         table.appendChild(row);
-      });
-      
-      document.querySelectorAll('.complete-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          completeOrder(parseInt(this.dataset.id));
-        });
-      });
-      
-      document.querySelectorAll('.view-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          viewOrder(parseInt(this.dataset.id));
-        });
-      });
-      
-      document.querySelectorAll('.delete-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          deleteOrder(parseInt(this.dataset.id));
-        });
       });
     }
 
@@ -1608,29 +1687,17 @@
         const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.pharmacy}</td>
-          <td>${order.date}</td>
+          <td>${escapeHtml(order.id)}</td>
+          <td>${escapeHtml(order.pharmacy)}</td>
+          <td>${escapeHtml(order.date)}</td>
           <td>${total.toFixed(2)} د.ع</td>
           <td><span class="status-badge status-completed">مكتمل</span></td>
           <td>
-            <button class="btn btn-warning return-order" data-id="${order.id}">استرجاع</button>
-            <button class="btn btn-primary view-order" data-id="${order.id}">عرض</button>
+            <button class="btn btn-warning return-order" data-id="${escapeHtml(order.id)}">استرجاع</button>
+            <button class="btn btn-primary view-order" data-id="${escapeHtml(order.id)}">عرض</button>
           </td>
         `;
         table.appendChild(row);
-      });
-      
-      document.querySelectorAll('.return-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          returnOrder(parseInt(this.dataset.id));
-        });
-      });
-      
-      document.querySelectorAll('.view-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          viewOrder(parseInt(this.dataset.id));
-        });
       });
     }
 
@@ -1649,29 +1716,17 @@
         const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.pharmacy}</td>
-          <td>${order.date}</td>
+          <td>${escapeHtml(order.id)}</td>
+          <td>${escapeHtml(order.pharmacy)}</td>
+          <td>${escapeHtml(order.date)}</td>
           <td>${total.toFixed(2)} د.ع</td>
           <td><span class="status-badge status-returned">مسترجعة</span></td>
           <td>
-            <button class="btn btn-primary view-order" data-id="${order.id}">عرض</button>
-            <button class="btn btn-danger delete-order" data-id="${order.id}">حذف</button>
+            <button class="btn btn-primary view-order" data-id="${escapeHtml(order.id)}">عرض</button>
+            <button class="btn btn-danger delete-order" data-id="${escapeHtml(order.id)}">حذف</button>
           </td>
         `;
         table.appendChild(row);
-      });
-      
-      document.querySelectorAll('.view-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          viewOrder(parseInt(this.dataset.id));
-        });
-      });
-      
-      document.querySelectorAll('.delete-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          deleteOrder(parseInt(this.dataset.id));
-        });
       });
     }
 
@@ -1702,7 +1757,7 @@
       
       // تحديث حالة الطلب
       orders[orderIndex].status = 'مكتمل';
-      orders[orderIndex].completedDate = new Date().toISOString().split('T')[0];
+      orders[orderIndex].completedDate = todayISO();
       
       localStorage.setItem('products', JSON.stringify(products));
       localStorage.setItem('orders', JSON.stringify(orders));
@@ -1730,7 +1785,7 @@
       
       // تحديث حالة الطلب
       orders[orderIndex].status = 'مسترجعة';
-      orders[orderIndex].returnedDate = new Date().toISOString().split('T')[0];
+      orders[orderIndex].returnedDate = todayISO();
       
       localStorage.setItem('products', JSON.stringify(products));
       localStorage.setItem('orders', JSON.stringify(orders));
@@ -1763,14 +1818,14 @@
       products.forEach(product => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td><img src="${normalizeImageUrl(product.image)}" style="width:50px;height:50px;object-fit:cover" alt="${product.name}"></td>
-          <td>${product.name}</td>
-          <td>${product.type}</td>
-          <td>${product.price} د.ع</td>
-          <td>${product.stock}</td>
+          <td><img src="${escapeHtml(normalizeImageUrl(product.image))}" style="width:50px;height:50px;object-fit:cover" alt="${escapeHtml(product.name)}"></td>
+          <td>${escapeHtml(product.name)}</td>
+          <td>${escapeHtml(product.type)}</td>
+          <td>${escapeHtml(product.price)} د.ع</td>
+          <td>${escapeHtml(product.stock)}</td>
           <td>
-            <button class="btn btn-primary edit-medicine" data-id="${product.id}">تعديل</button>
-            <button class="btn btn-danger delete-medicine" data-id="${product.id}">حذف</button>
+            <button class="btn btn-primary edit-medicine" data-id="${escapeHtml(product.id)}">تعديل</button>
+            <button class="btn btn-danger delete-medicine" data-id="${escapeHtml(product.id)}">حذف</button>
           </td>
         `;
         table.appendChild(row);
@@ -1887,7 +1942,7 @@
     function updateStats() {
       document.getElementById('total-products').textContent = products.length;
       document.getElementById('pending-orders').textContent = orders.filter(o => o.status === 'معلق').length;
-      document.getElementById('low-stock').textContent = products.filter(p => p.stock < 10).length;
+      document.getElementById('low-stock').textContent = products.filter(isLowStock).length;
       
       const totalSales = orders
         .filter(order => order.status === 'مكتمل')
@@ -1907,10 +1962,10 @@
         if (product.stock === 0) {
           status = 'نافذ';
           statusColor = 'red';
-        } else if (product.stock < 5) {
+        } else if (product.stock < CRITICAL_STOCK_THRESHOLD) {
           status = 'منخفض جداً';
           statusColor = 'red';
-        } else if (product.stock < 10) {
+        } else if (product.stock < LOW_STOCK_THRESHOLD) {
           status = 'منخفض';
           statusColor = 'orange';
         } else if (product.stock < 20) {
@@ -1923,10 +1978,10 @@
         
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${product.name}</td>
-          <td>${product.type}</td>
-          <td>${product.price} د.ع</td>
-          <td>${product.stock}</td>
+          <td>${escapeHtml(product.name)}</td>
+          <td>${escapeHtml(product.type)}</td>
+          <td>${escapeHtml(product.price)} د.ع</td>
+          <td>${escapeHtml(product.stock)}</td>
           <td style="color:${statusColor};font-weight:bold">${status}</td>
         `;
         inventoryTable.appendChild(row);
@@ -1955,9 +2010,9 @@
         
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.pharmacy}</td>
-          <td>${order.date}</td>
+          <td>${escapeHtml(order.id)}</td>
+          <td>${escapeHtml(order.pharmacy)}</td>
+          <td>${escapeHtml(order.date)}</td>
           <td>${total.toFixed(2)} د.ع</td>
           <td>${statusBadge}</td>
         `;
@@ -2067,12 +2122,12 @@
           salesData.forEach(order => {
             reportHTML += `
               <tr>
-                <td>${order.id}</td>
-                <td>${order.pharmacy}</td>
-                <td>${order.date}</td>
-                <td>${order.itemsCount}</td>
+                <td>${escapeHtml(order.id)}</td>
+                <td>${escapeHtml(order.pharmacy)}</td>
+                <td>${escapeHtml(order.date)}</td>
+                <td>${escapeHtml(order.itemsCount)}</td>
                 <td>${order.total.toFixed(2)} د.ع</td>
-                <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+                <td><span class="status-badge ${getStatusClass(order.status)}">${escapeHtml(order.status)}</span></td>
               </tr>
             `;
           });
@@ -2111,9 +2166,9 @@
             reportHTML += `
               <tr>
                 <td>${index + 1}</td>
-                <td>${product.name}</td>
-                <td>${product.type}</td>
-                <td>${product.totalQuantity}</td>
+                <td>${escapeHtml(product.name)}</td>
+                <td>${escapeHtml(product.type)}</td>
+                <td>${escapeHtml(product.totalQuantity)}</td>
                 <td>${product.totalSales.toFixed(2)} د.ع</td>
               </tr>
             `;
@@ -2132,7 +2187,7 @@
         reportHTML += '<div class="report-section">';
         reportHTML += '<h3><i class="fas fa-exclamation-triangle"></i> الأدوية منخفضة المخزون</h3>';
         
-        const lowStockProducts = products.filter(p => p.stock < 10);
+        const lowStockProducts = products.filter(isLowStock);
         
         if (lowStockProducts.length > 0) {
           reportHTML += `
@@ -2156,7 +2211,7 @@
             if (product.stock === 0) {
               status = 'نافذ';
               statusColor = 'red';
-            } else if (product.stock < 5) {
+            } else if (product.stock < CRITICAL_STOCK_THRESHOLD) {
               status = 'منخفض جداً';
               statusColor = 'red';
             } else {
@@ -2166,10 +2221,10 @@
             
             reportHTML += `
               <tr>
-                <td>${product.name}</td>
-                <td>${product.type}</td>
-                <td>${product.price} د.ع</td>
-                <td>${product.stock}</td>
+                <td>${escapeHtml(product.name)}</td>
+                <td>${escapeHtml(product.type)}</td>
+                <td>${escapeHtml(product.price)} د.ع</td>
+                <td>${escapeHtml(product.stock)}</td>
                 <td style="color: ${statusColor}; font-weight: bold;">${status}</td>
               </tr>
             `;
@@ -2199,7 +2254,7 @@
       
       return {
         totalProducts: products.length,
-        lowStockProducts: products.filter(p => p.stock < 10).length,
+        lowStockProducts: products.filter(isLowStock).length,
         completedOrders: filteredOrders.filter(o => o.status === 'مكتمل').length,
         pendingOrders: filteredOrders.filter(o => o.status === 'معلق').length,
         totalSales: filteredOrders
@@ -2224,6 +2279,11 @@
     }
 
     function getTopSellingProducts(startDate, endDate) {
+      return getProductSalesTotals(startDate, endDate).slice(0, 10);
+    }
+
+    // كل الأدوية المباعة في الفترة مرتبة تنازلياً حسب الكمية
+    function getProductSalesTotals(startDate, endDate) {
       const productSales = {};
       
       orders
@@ -2245,8 +2305,7 @@
         });
       
       return Object.values(productSales)
-        .sort((a, b) => b.totalQuantity - a.totalQuantity)
-        .slice(0, 10);
+        .sort((a, b) => b.totalQuantity - a.totalQuantity);
     }
 
     function getStatusClass(status) {
@@ -2387,8 +2446,159 @@
       printWindow.document.close();
     }
 
-    function exportReportToExcel() {
-      showNotification('سيتم إضافة خاصية التصدير لاحقاً', 'info');
+    // ===== تصدير التقرير إلى Excel =====
+    // تُحمَّل مكتبة SheetJS عند الضغط على الزر فقط، وإن تعذّر تحميلها (بدون إنترنت) نصدّر CSV يفتحه Excel.
+    const SHEETJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    let sheetJsPromise = null;
+
+    function loadSheetJS() {
+      if (window.XLSX) return Promise.resolve(window.XLSX);
+      if (!sheetJsPromise) {
+        sheetJsPromise = new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = SHEETJS_URL;
+          script.onload = () => (window.XLSX ? resolve(window.XLSX) : reject(new Error('XLSX not available')));
+          script.onerror = () => { sheetJsPromise = null; reject(new Error('تعذّر تحميل مكتبة Excel')); };
+          document.head.appendChild(script);
+        });
+      }
+      return sheetJsPromise;
+    }
+
+    // يبني أوراق التقرير كمصفوفات (صف العناوين أولاً) حسب الخيارات المحددة في صفحة التقارير
+    function buildReportSheets(startDate, endDate) {
+      const opts = {
+        sales: document.getElementById('report-sales').checked,
+        returns: document.getElementById('report-returns').checked,
+        topSelling: document.getElementById('report-top-selling').checked,
+        leastSelling: document.getElementById('report-least-selling').checked,
+        lowStock: document.getElementById('report-low-stock').checked,
+        totalProducts: document.getElementById('report-total-products').checked,
+        totalSales: document.getElementById('report-total-sales').checked
+      };
+      const sheets = [];
+
+      const stats = calculateGeneralStats(startDate, endDate);
+      const summary = [['البند', 'القيمة'], ['الفترة', `${startDate} إلى ${endDate}`], ['تاريخ التقرير', todayISO()]];
+      if (opts.totalProducts) {
+        summary.push(['إجمالي الأدوية', stats.totalProducts]);
+        summary.push(['أدوية منخفضة المخزون', stats.lowStockProducts]);
+      }
+      if (opts.totalSales) {
+        summary.push(['الطلبات المكتملة', stats.completedOrders]);
+        summary.push(['الطلبات المعلقة', stats.pendingOrders]);
+        summary.push(['إجمالي المبيعات (د.ع)', stats.totalSales]);
+      }
+      sheets.push({ name: 'ملخص', rows: summary });
+
+      if (opts.sales) {
+        const rows = [['رقم الطلب', 'الصيدلية', 'التاريخ', 'عدد القطع', 'المبلغ (د.ع)', 'الحالة']];
+        getSalesData(startDate, endDate).forEach(o =>
+          rows.push([o.id, o.pharmacy, o.date, o.itemsCount, o.total, o.status]));
+        sheets.push({ name: 'المبيعات', rows });
+      }
+
+      if (opts.returns) {
+        const rows = [['رقم الطلب', 'الصيدلية', 'تاريخ الطلب', 'تاريخ الاسترجاع', 'المبلغ (د.ع)']];
+        orders
+          .filter(o => o.status === 'مسترجعة' && o.date >= startDate && o.date <= endDate)
+          .forEach(o => rows.push([
+            o.id, o.pharmacy, o.date, o.returnedDate || '',
+            o.items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+          ]));
+        sheets.push({ name: 'المسترجع', rows });
+      }
+
+      if (opts.topSelling || opts.leastSelling) {
+        const all = getProductSalesTotals(startDate, endDate);
+        const header = ['#', 'اسم الدواء', 'النوع', 'الكمية المباعة', 'إجمالي المبيعات (د.ع)'];
+        const toRows = list => [header, ...list.map((p, i) => [i + 1, p.name, p.type, p.totalQuantity, p.totalSales])];
+        if (opts.topSelling) sheets.push({ name: 'الأكثر مبيعاً', rows: toRows(all.slice(0, 10)) });
+        if (opts.leastSelling) sheets.push({ name: 'الأقل مبيعاً', rows: toRows(all.slice().reverse().slice(0, 10)) });
+      }
+
+      if (opts.lowStock) {
+        const rows = [['اسم الدواء', 'النوع', 'السعر (د.ع)', 'الكمية المتاحة', 'حالة المخزون']];
+        products.filter(isLowStock).forEach(p => rows.push([
+          p.name, p.type, p.price, p.stock,
+          p.stock === 0 ? 'نافذ' : p.stock < CRITICAL_STOCK_THRESHOLD ? 'منخفض جداً' : 'منخفض'
+        ]));
+        sheets.push({ name: 'منخفض المخزون', rows });
+      }
+
+      return sheets;
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function exportSheetsAsCsv(sheets, baseName) {
+      const cell = v => {
+        const t = String(v ?? '');
+        // منع حقن الصيغ في Excel (= + - @) وتغليف الخلايا التي تحتوي فواصل أو علامات اقتباس
+        const safe = /^[=+\-@]/.test(t) && isNaN(Number(t)) ? "'" + t : t;
+        return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+      };
+      const lines = [];
+      sheets.forEach((sheet, idx) => {
+        if (idx > 0) lines.push('');
+        lines.push(cell(sheet.name));
+        sheet.rows.forEach(row => lines.push(row.map(cell).join(',')));
+      });
+      // BOM حتى يتعرّف Excel على الترميز العربي UTF-8
+      downloadBlob(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }), `${baseName}.csv`);
+    }
+
+    async function exportReportToExcel() {
+      if (!checkPermission('reports')) {
+        showNotification('ليس لديك صلاحية لتصدير التقارير', 'error');
+        return;
+      }
+      const startDate = document.getElementById('report-start-date').value;
+      const endDate = document.getElementById('report-end-date').value;
+      if (!startDate || !endDate) {
+        showNotification('يرجى تحديد تاريخ البدء والانتهاء', 'error');
+        return;
+      }
+      if (startDate > endDate) {
+        showNotification('تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء', 'error');
+        return;
+      }
+
+      const sheets = buildReportSheets(startDate, endDate);
+      // اسم ملف بأحرف لاتينية: بعض المتصفحات تستبدل الأسماء العربية بـ "download"
+      const baseName = `Dijla-report_${startDate}_to_${endDate}`;
+      const btn = document.getElementById('export-report');
+      btn.disabled = true;
+
+      try {
+        const XLSX = await loadSheetJS();
+        const wb = XLSX.utils.book_new();
+        wb.Workbook = { Views: [{ RTL: true }] }; // اتجاه الأوراق من اليمين لليسار
+        sheets.forEach(sheet => {
+          const ws = XLSX.utils.aoa_to_sheet(sheet.rows);
+          ws['!cols'] = sheet.rows[0].map((_, c) => ({
+            wch: Math.min(40, Math.max(10, ...sheet.rows.map(r => String(r[c] ?? '').length + 2)))
+          }));
+          XLSX.utils.book_append_sheet(wb, ws, sheet.name.slice(0, 31));
+        });
+        XLSX.writeFile(wb, `${baseName}.xlsx`);
+        showNotification('تم تصدير التقرير إلى Excel', 'success');
+      } catch (err) {
+        console.warn('XLSX export failed, falling back to CSV', err);
+        exportSheetsAsCsv(sheets, baseName);
+        showNotification('تعذّر تحميل مكتبة Excel (لا يوجد اتصال؟) فتم التصدير بصيغة CSV', 'warning');
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     // دوال مساعدة
@@ -2403,7 +2613,7 @@
         <html dir="rtl">
         <head>
           <meta charset="utf-8">
-          <title>فاتورة طلبية ${order.pharmacy}</title>
+          <title>فاتورة طلبية ${escapeHtml(order.pharmacy)}</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
             .invoice-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 15px; }
@@ -2423,10 +2633,10 @@
         </head>
         <body>
           <div class="invoice-header">
-            <div class="invoice-title">طلبية ${order.pharmacy}</div>
+            <div class="invoice-title">طلبية ${escapeHtml(order.pharmacy)}</div>
             <div class="invoice-details">
-              <div>رقم الفاتورة: ${order.id}</div>
-              <div>التاريخ: ${order.date}</div>
+              <div>رقم الفاتورة: ${escapeHtml(order.id)}</div>
+              <div>التاريخ: ${escapeHtml(order.date)}</div>
             </div>
           </div>
           
@@ -2445,10 +2655,10 @@
               ${order.items.map((item, index) => `
                 <tr>
                   <td>${index + 1}</td>
-                  <td>${item.name}</td>
-                  <td>${item.type}</td>
-                  <td>${item.price} د.ع</td>
-                  <td>${item.quantity}</td>
+                  <td>${escapeHtml(item.name)}</td>
+                  <td>${escapeHtml(item.type)}</td>
+                  <td>${escapeHtml(item.price)} د.ع</td>
+                  <td>${escapeHtml(item.quantity)}</td>
                   <td>${(item.price * item.quantity).toFixed(2)} د.ع</td>
                 </tr>
               `).join('')}
@@ -2464,7 +2674,7 @@
           ${order.notes ? `
           <div class="notes-section">
             <h3>ملاحظات التجهيز:</h3>
-            <p>${order.notes}</p>
+            <p>${escapeHtml(order.notes)}</p>
           </div>
           ` : ''}
           
@@ -2540,14 +2750,12 @@
     }
 
     function normalizeImageUrl(url) {
-      const placeholderBase = 'https://via.placeholder.com/';
-      if (!url) return placeholderBase + '400x300?text=دواء';
+      if (!url) return PLACEHOLDER_IMAGE;
       url = String(url).trim();
-      if (/^data:/.test(url) || /^https?:\/\//.test(url)) return url;
-      // handle values like "400x300?text=دواء"
-      if (/^\d+x\d+\?.+/.test(url) || url.includes('placeholder.com')) {
-        return placeholderBase + url.replace(/^\/+/, '');
-      }
+      // روابط via.placeholder.com القديمة لم تعد تعمل: نستبدلها بالصورة المحلية
+      if (url.includes('placeholder.com') || /^\d+x\d+\?.+/.test(url)) return PLACEHOLDER_IMAGE;
+      if (/^data:image\//.test(url) || /^https?:\/\//.test(url)) return url;
+      if (/^(javascript|data|vbscript):/i.test(url)) return PLACEHOLDER_IMAGE;
       // if starts with "/" use origin, else avoid creating invalid host for numeric placeholders
       if (url.startsWith('/')) return location.origin + url;
       // fallback: treat as relative path (don't prefix "https://" blindly)
@@ -2619,7 +2827,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `backup-${todayISO()}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -2638,9 +2846,13 @@
       reader.onload = function(e) {
         try {
           const data = JSON.parse(e.target.result);
+          if (!data || !Array.isArray(data.products) || !Array.isArray(data.orders)) {
+            showNotification('ملف النسخة الاحتياطية غير صالح', 'error');
+            return;
+          }
           if (confirm('هل أنت متأكد من استعادة البيانات؟ سيتم استبدال جميع البيانات الحالية.')) {
-            products = data.products || [];
-            orders = data.orders || [];
+            products = onlyObjects(data.products).map(normalizeProduct);
+            orders = onlyObjects(data.orders).map(normalizeOrder);
             localStorage.setItem('products', JSON.stringify(products));
             localStorage.setItem('orders', JSON.stringify(orders));
             loadProducts();
@@ -2657,7 +2869,7 @@
 
     // نظام تنبيهات المخزون المنخفض
     function checkLowStockAlerts() {
-      const lowStockProducts = products.filter(p => p.stock < 5);
+      const lowStockProducts = products.filter(isLowStock);
       if (lowStockProducts.length > 0) {
         showNotification(`هناك ${lowStockProducts.length} منتج منخفض المخزون`, 'warning');
       }
@@ -2684,7 +2896,7 @@
         chartsHTML += `
           <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
             <div style="background: var(--primary-color); width: 30px; height: ${height}px; border-radius: 4px 4px 0 0;"></div>
-            <div style="margin-top: 5px; font-size: 12px;">${month}</div>
+            <div style="margin-top: 5px; font-size: 12px;">${escapeHtml(month)}</div>
             <div style="font-size: 12px; font-weight: bold;">${sales.toFixed(2)}</div>
           </div>
         `;
@@ -2704,8 +2916,8 @@
         chartsHTML += `
           <div style="margin-bottom: 10px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-              <span>${product.name}</span>
-              <span>${product.totalQuantity}</span>
+              <span>${escapeHtml(product.name)}</span>
+              <span>${escapeHtml(product.totalQuantity)}</span>
             </div>
             <div style="background: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden;">
               <div style="background: var(--success-color); height: 100%; width: ${width}%;"></div>
