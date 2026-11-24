@@ -1,0 +1,2757 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>نظام إدارة مبيعات الأدوية - شركة دجلة</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #2c7fb8;
+      --secondary-color: #7fcdbb;
+      --accent-color: #edf8b1;
+      --text-color: #253238;
+      --light-color: #f5f5f5;
+      --danger-color: #e74c3c;
+      --success-color: #2ecc71;
+      --warning-color: #f39c12;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f0f2f5;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 15px 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    
+    .main-content {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .sidebar {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .sidebar h3 {
+      margin-bottom: 15px;
+      color: var(--primary-color);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .sidebar ul {
+      list-style: none;
+    }
+    
+    .sidebar ul li {
+      margin-bottom: 10px;
+    }
+    
+    .sidebar ul li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 15px;
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .sidebar ul li a i {
+      width: 20px;
+      text-align: center;
+    }
+    
+    .sidebar ul li a:hover, .sidebar ul li a.active {
+      background-color: var(--accent-color);
+      color: var(--primary-color);
+    }
+    
+    .content {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .page {
+      display: none;
+    }
+    
+    .page.active {
+      display: block;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .page-title {
+      color: var(--primary-color);
+    }
+    
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #236fa0;
+    }
+    
+    .btn-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background-color: #27ae60;
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+    
+    .btn-warning {
+      background-color: var(--warning-color);
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background-color: #e67e22;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      border: 1px solid #eaeaea;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .card-img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+    
+    .card-body {
+      padding: 15px;
+    }
+    
+    .card-title {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+    
+    .card-price {
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+    
+    /* product card type under price */
+    .card-meta { display:flex;flex-direction:column;gap:6px;margin-top:8px }
+    .card-type { color:#6b7a85;font-size:13px;font-weight:600 }
+    /* optional small badge look */
+    .card-type.badge { background:rgba(15,111,191,0.06);color:var(--primary-color);padding:4px 8px;border-radius:8px;display:inline-block }
+    
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    
+    .quantity-btn {
+      width: 30px;
+      height: 30px;
+      background-color: #eee;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .quantity-input {
+      width: 50px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 5px;
+    }
+    
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+    
+    .cart-item-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .cart-item-img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    
+    .cart-item-details h4 {
+      margin-bottom: 5px;
+    }
+    
+    .cart-item-price {
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+    
+    .cart-summary {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .summary-total {
+      font-weight: bold;
+      font-size: 18px;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    table th, table td {
+      padding: 12px 15px;
+      text-align: right;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    table th {
+      background-color: #f5f5f5;
+      font-weight: 600;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+    
+    .stat-card {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.08);
+    }
+    
+    .stat-card .icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 22px;
+    }
+    
+    .stat-card .body {
+      flex: 1;
+      text-align: right;
+    }
+    
+    .stat-card .title {
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 4px;
+    }
+    
+    .stat-card .value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-color);
+    }
+    
+    .icon.total { background: linear-gradient(45deg,#2c7fb8,#236fa0); }
+    .icon.pending { background: linear-gradient(45deg,#f39c12,#e67e22); }
+    .icon.low { background: linear-gradient(45deg,#e74c3c,#c0392b); }
+    .icon.sales { background: linear-gradient(45deg,#2ecc71,#27ae60); }
+    
+    .orders-tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    
+    .orders-tab {
+      padding: 12px 24px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-size: 16px;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+    
+    .orders-tab.active {
+      border-bottom-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+    
+    .orders-tab-content {
+      display: none;
+    }
+    
+    .orders-tab-content.active {
+      display: block;
+    }
+    
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .status-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-completed {
+      background-color: #d1ecf1;
+      color: #0c5460;
+    }
+    
+    .status-returned {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .reports-controls {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .report-type-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .report-type-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .date-range-selector {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .date-input {
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .report-results {
+      margin-top: 20px;
+    }
+    
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    
+    .report-table th, .report-table td {
+      padding: 12px 15px;
+      text-align: right;
+      border: 1px solid #ddd;
+    }
+    
+    .report-table th {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .report-summary {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    
+    .report-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .report-section h3 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 8px;
+    }
+    
+    .notification {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      color: white;
+      z-index: 1000;
+      max-width: 400px;
+    }
+    
+    /* تحسينات إضافية */
+    .products-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .filter-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    
+    .user-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .chart-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    .backup-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        display: none;
+      }
+      
+      .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+      }
+      
+      .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+      
+      .date-range-selector {
+        flex-direction: column;
+      }
+      
+      .orders-tabs {
+        flex-direction: column;
+      }
+      
+      .orders-tab {
+        text-align: center;
+      }
+      
+      .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .cart-item-info {
+        width: 100%;
+      }
+      
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .user-controls {
+        flex-direction: column;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="notification" id="notification"></div>
+
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div style="font-weight:700"> نظام مبيعات ادوية شركة دجلة/ الديوانية</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="height:40px; display:flex; align-items:center; justify-content:center; 
+                      border-radius:4px; font-weight:bold; font-size:16px;">
+            <img src="images\dijla.png" style="height:80px;object-fit:contain">
+          </div>
+          <div class="user-controls">
+            <button id="backup-data" class="btn btn-primary">نسخ احتياطي</button>
+            <input type="file" id="restore-data" accept=".json" style="display:none">
+            <button id="restore-btn" class="btn btn-warning">استعادة بيانات</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="main-content">
+      <aside class="sidebar">
+        <h3>القائمة</h3>
+        <ul>
+          <li><a href="#" class="sidebar-link active" data-page="home"><i class="fas fa-home"></i> الرئيسية</a></li>
+          <li><a href="#" class="sidebar-link" data-page="products"><i class="fas fa-pills"></i> الأدوية</a></li>
+          <li><a href="#" class="sidebar-link" data-page="add-product"><i class="fas fa-plus-circle"></i> إضافة دواء</a></li>
+          <li><a href="#" class="sidebar-link" data-page="manage-medicines"><i class="fas fa-edit"></i> إدارة الأدوية</a></li>
+          <li><a href="#" class="sidebar-link" data-page="cart"><i class="fas fa-shopping-cart"></i> سلة المشتريات</a></li>
+          <li><a href="#" class="sidebar-link" data-page="orders"><i class="fas fa-clipboard-list"></i> الطلبات</a></li>
+          <li><a href="#" class="sidebar-link" data-page="inventory"><i class="fas fa-boxes"></i> المخزون</a></li>
+          <li><a href="#" class="sidebar-link" data-page="reports"><i class="fas fa-chart-bar"></i> التقارير</a></li>
+        </ul>
+      </aside>
+
+      <main class="content">
+        <!-- الصفحة الرئيسية -->
+        <section id="home" class="page active">
+          <h2>لوحة التحكم</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="icon total"><i class="fas fa-pills"></i></div>
+              <div class="body">
+                <div class="title">إجمالي الأدوية</div>
+                <div id="total-products" class="value">0</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="icon pending"><i class="fas fa-clock"></i></div>
+              <div class="body">
+                <div class="title">طلبات قيد الانتظار</div>
+                <div id="pending-orders" class="value">0</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="icon low"><i class="fas fa-exclamation-triangle"></i></div>
+              <div class="body">
+                <div class="title">أدوية منخفضة المخزون</div>
+                <div id="low-stock" class="value">0</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="icon sales"><i class="fas fa-wallet"></i></div>
+              <div class="body">
+                <div class="title">إجمالي المبيعات</div>
+                <div id="total-sales" class="value">0</div>
+              </div>
+            </div>
+          </div>
+          <h3 style="margin-top:20px">آخر الطلبات</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>رقم</th>
+                <th>الصيدلية</th>
+                <th>التاريخ</th>
+                <th>المبلغ</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody id="recent-orders"></tbody>
+          </table>
+        </section>
+
+        <!-- صفحة الأدوية -->
+        <section id="products" class="page">
+          <div class="page-header">
+            <h2 class="page-title">عرض الأدوية</h2>
+            <div style="display:flex;gap:10px">
+              <input id="search-products" class="form-control" placeholder="بحث..." style="max-width:240px">
+            </div>
+          </div>
+          <div class="products-filter">
+            <button class="filter-btn active" data-filter="all">الكل</button>
+            <button class="filter-btn" data-filter="حبوب">حبوب</button>
+            <button class="filter-btn" data-filter="مرهم">مرهم</button>
+            <button class="filter-btn" data-filter="كريم">كريم</button>
+            <button class="filter-btn" data-filter="شراب">شراب</button>
+            <button class="filter-btn" data-filter="قطرة">قطرة</button>
+            <button class="filter-btn" data-filter="معقمات">معقمات</button>
+          </div>
+          <div class="card-grid" id="products-grid"></div>
+        </section>
+
+        <!-- صفحة إضافة دواء جديد -->
+        <section id="add-product" class="page">
+          <h2>إضافة دواء جديد</h2>
+          <form id="add-product-form" style="max-width:600px">
+            <div class="form-group">
+              <input id="product-name" class="form-control" placeholder="اسم الدواء" required>
+            </div>
+            <div class="form-group">
+              <select id="product-type" class="form-control" required>
+                <option value="">اختر النوع...</option>
+                <option value="حبوب">حبوب</option>
+                <option value="مرهم">مرهم</option>
+                <option value="كريم">كريم</option>
+                <option value="شراب">شراب</option>
+                <option value="قطرة">قطرة</option>
+                <option value="معقمات">معقمات</option>
+                <option value="أخرى">أخرى</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:15px">
+              <div class="form-group" style="flex:1">
+                <input id="product-price" class="form-control" placeholder="السعر" type="number" step="0.01" min="0" required>
+              </div>
+              <div class="form-group" style="flex:1">
+                <input id="product-stock" class="form-control" placeholder="الكمية" type="number" min="0" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <input id="product-image" class="form-control" type="file" accept="image/*">
+            </div>
+            <button class="btn btn-primary" type="submit">إضافة الدواء</button>
+          </form>
+        </section>
+
+        <!-- صفحة إدارة الأدوية -->
+        <section id="manage-medicines" class="page">
+          <h2>إدارة الأدوية</h2>
+          <div style="overflow:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>صورة</th>
+                  <th>الاسم</th>
+                  <th>النوع</th>
+                  <th>السعر</th>
+                  <th>الكمية</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="manage-medicines-table"></tbody>
+            </table>
+          </div>
+
+          <!-- نافذة تعديل الدواء -->
+          <div id="edit-medicine-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:1000">
+            <div style="background:#fff;padding:20px;border-radius:8px;max-width:500px;width:90%">
+              <h3>تعديل الدواء</h3>
+              <div class="form-group">
+                <input id="edit-medicine-name" class="form-control" placeholder="اسم الدواء">
+              </div>
+              <div class="form-group">
+                <input id="edit-medicine-type" class="form-control" placeholder="نوع الدواء">
+              </div>
+              <div style="display:flex;gap:10px;margin-bottom:15px">
+                <div class="form-group" style="flex:1">
+                  <input id="edit-medicine-price" class="form-control" type="number" step="0.01" min="0" placeholder="السعر">
+                </div>
+                <div class="form-group" style="flex:1">
+                  <input id="edit-medicine-stock" class="form-control" type="number" min="0" placeholder="الكمية">
+                </div>
+              </div>
+              <div class="form-group">
+                <input id="edit-medicine-image" class="form-control" type="file" accept="image/*">
+              </div>
+              <div style="display:flex;gap:10px;margin-top:15px">
+                <button id="save-medicine-changes" class="btn btn-success">حفظ التغييرات</button>
+                <button id="cancel-edit-medicine" class="btn btn-danger">إلغاء</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- صفحة سلة المشتريات -->
+        <section id="cart" class="page">
+          <h2>سلة المشتريات</h2>
+          <div id="cart-items"></div>
+          <div class="cart-summary">
+            <div style="display:flex;gap:20px;align-items:flex-start">
+              <div style="flex:1">
+                <div class="summary-row">
+                  <span>المجموع:</span>
+                  <span id="cart-subtotal">0.00</span> د.ع
+                </div>
+                <div class="summary-total">
+                  <span>الإجمالي:</span>
+                  <span id="cart-total">0.00</span> د.ع
+                </div>
+              </div>
+              <div style="flex-basis:300px">
+                <div class="form-group">
+                  <input id="pharmacy-name" class="form-control" placeholder="اسم الصيدلية">
+                </div>
+                <div class="form-group">
+                  <textarea id="order-notes" class="form-control" placeholder="ملاحظات التجهيز (ستُضمّن مع الفاتورة)" style="height:80px"></textarea>
+                </div>
+                <div class="form-group">
+                  <input id="whatsapp-number" class="form-control" placeholder="رقم واتساب (مثال: 9647712345678)">
+                </div>
+                <div style="display:flex;gap:10px;margin-top:15px">
+                  <button id="create-invoice" class="btn btn-success">إنشاء فاتورة</button>
+                  <button id="send-whatsapp" class="btn btn-primary">إرسال عبر واتساب</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- صفحة الطلبات -->
+        <section id="orders" class="page">
+          <h2>الطلبات</h2>
+          
+          <div class="orders-tabs">
+            <button class="orders-tab active" data-tab="pending">الطلبات المعلقة</button>
+            <button class="orders-tab" data-tab="completed">الطلبات المكتملة</button>
+            <button class="orders-tab" data-tab="returned">الطلبات المسترجعة</button>
+          </div>
+
+          <div class="orders-tab-content active" id="pending-orders-tab">
+            <h3>الطلبات المعلقة</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم</th>
+                  <th>الصيدلية</th>
+                  <th>التاريخ</th>
+                  <th>المبلغ</th>
+                  <th>الحالة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="pending-orders-table"></tbody>
+            </table>
+          </div>
+
+          <div class="orders-tab-content" id="completed-orders-tab">
+            <h3>الطلبات المكتملة</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم</th>
+                  <th>الصيدلية</th>
+                  <th>التاريخ</th>
+                  <th>المبلغ</th>
+                  <th>الحالة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="completed-orders-table"></tbody>
+            </table>
+          </div>
+
+          <div class="orders-tab-content" id="returned-orders-tab">
+            <h3>الطلبات المسترجعة</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم</th>
+                  <th>الصيدلية</th>
+                  <th>التاريخ</th>
+                  <th>المبلغ</th>
+                  <th>الحالة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="returned-orders-table"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- صفحة المخزون -->
+        <section id="inventory" class="page">
+          <h2>المخزون</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>اسم الدواء</th>
+                <th>النوع</th>
+                <th>السعر</th>
+                <th>الكمية</th>
+                <th>حالة المخزون</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-table"></tbody>
+          </table>
+        </section>
+
+        <!-- صفحة التقارير -->
+        <section id="reports" class="page">
+          <div class="page-header">
+            <h2 class="page-title">التقارير</h2>
+            <div>
+              <button id="print-report" class="btn btn-primary">طباعة التقرير</button>
+              <button id="export-report" class="btn btn-success">تصدير Excel</button>
+            </div>
+          </div>
+
+          <div class="reports-controls">
+            <h3>إعدادات التقرير</h3>
+            
+            <div class="report-type-selector">
+              <div class="report-type-option">
+                <input type="checkbox" id="report-sales" checked>
+                <label for="report-sales">المبيعات</label>
+              </div>
+              <div class="report-type-option">
+                <input type="checkbox" id="report-returns" checked>
+                <label for="report-returns">المسترجع</label>
+              </div>
+              <div class="report-type-option">
+                <input type="checkbox" id="report-top-selling" checked>
+                <label for="report-top-selling">الأدوية الأكثر مبيعاً</label>
+              </div>
+              <div class="report-type-option">
+                <input type="checkbox" id="report-least-selling">
+                <label for="report-least-selling">الأدوية الأقل مبيعاً</label>
+              </div>
+              <div class="report-type-option">
+                <input type="checkbox" id="report-low-stock" checked>
+                <label for="report-low-stock">الأدوية منخفضة المخزون</label>
+              </div>
+              <div class="report-type-option">
+                <input type="checkbox" id="report-total-products" checked>
+                <label for="report-total-products">إجمالي الأدوية المتوفرة</label>
+              </div>
+              <div class="report-type-option">
+                <input type="checkbox" id="report-total-sales" checked>
+                <label for="report-total-sales">إجمالي المبيعات</label>
+              </div>
+              <div class="report-type-option">
+                <input type="checkbox" id="report-charts">
+                <label for="report-charts">إظهار الرسوم البيانية</label>
+              </div>
+            </div>
+
+            <div class="date-range-selector">
+              <div class="form-group date-input">
+                <label for="report-start-date">من تاريخ</label>
+                <input type="date" id="report-start-date" class="form-control">
+              </div>
+              <div class="form-group date-input">
+                <label for="report-end-date">إلى تاريخ</label>
+                <input type="date" id="report-end-date" class="form-control" value="${new Date().toISOString().split('T')[0]}">
+              </div>
+              <div class="form-group">
+                <label>&nbsp;</label>
+                <button id="generate-report" class="btn btn-success">توليد التقرير</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="report-results" id="report-results">
+            <div style="text-align: center; padding: 40px; color: #666;">
+              <i class="fas fa-chart-bar" style="font-size: 48px; margin-bottom: 15px;"></i>
+              <p>انقر على "توليد التقرير" لعرض البيانات</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // البيانات والمتغيرات العامة
+    const TAX_RATE = 0.0;
+    let products = [];
+    let cart = [];
+    let orders = [];
+    let currentEditingMedicineId = null;
+    
+    // نظام صلاحيات المستخدمين
+    const userRoles = {
+      admin: ['view', 'add', 'edit', 'delete', 'reports', 'backup'],
+      manager: ['view', 'add', 'edit', 'reports'],
+      cashier: ['view', 'add']
+    };
+    
+    let currentUser = {
+      name: 'مدير النظام',
+      role: 'admin'
+    };
+    
+    // safe localStorage setter (falls back to sessionStorage)
+    function safeSave(key, valueObj) {
+      try {
+        localStorage.setItem(key, JSON.stringify(valueObj));
+        return true;
+      } catch (e) {
+        console.warn('localStorage setItem failed', e);
+        try {
+          sessionStorage.setItem(key, JSON.stringify(valueObj));
+          return true;
+        } catch (e2) {
+          console.error('sessionStorage setItem failed', e2);
+          showNotification('لا يمكن حفظ البيانات محلياً (سعة التخزين ممتلئة)', 'error');
+          return false;
+        }
+      }
+    }
+
+    // تهيئة التطبيق
+    document.addEventListener('DOMContentLoaded', function() {
+      loadDataFromStorage();
+      setupEventListeners();
+      initializeSampleData();
+      updateStats();
+      loadProducts();
+      loadOrders();
+      updateCart();
+      checkLowStockAlerts();
+      
+      // تعيين التاريخ الافتراضي لبداية الشهر
+      const startDate = new Date();
+      startDate.setDate(1);
+      document.getElementById('report-start-date').value = startDate.toISOString().split('T')[0];
+    });
+
+    function loadDataFromStorage() {
+      products = JSON.parse(localStorage.getItem('products') || '[]');
+      cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    }
+
+    function initializeSampleData() {
+      if (products.length === 0) {
+        const sampleProducts = [
+          { id: 1, name: 'باراسيتامول', type: 'حبوب', price: 2500, stock: 50, image: 'https://via.placeholder.com/400x300?text=باراسيتامول' },
+          { id: 2, name: 'أموكسيسيلين', type: 'حبوب', price: 5000, stock: 30, image: 'https://via.placeholder.com/400x300?text=أموكسيسيلين' },
+          { id: 3, name: 'فيتامين سي', type: 'حبوب', price: 3000, stock: 20, image: 'https://via.placeholder.com/400x300?text=فيتامين+سي' },
+          { id: 4, name: 'مرهم مضاد حيوي', type: 'مرهم', price: 7500, stock: 15, image: 'https://via.placeholder.com/400x300?text=مرهم' }
+        ];
+        products = sampleProducts;
+        localStorage.setItem('products', JSON.stringify(products));
+      }
+      
+      // إضافة بيانات تجريبية للطلبات إذا لم تكن موجودة
+      if (orders.length === 0) {
+        const sampleOrders = [
+          {
+            id: 1,
+            pharmacy: 'صيدلية الحياة',
+            notes: 'تجهيز سريع',
+            items: [
+              { id: 1, name: 'باراسيتامول', type: 'حبوب', price: 2500, quantity: 2 },
+              { id: 3, name: 'فيتامين سي', type: 'حبوب', price: 3000, quantity: 1 }
+            ],
+            date: new Date().toISOString().split('T')[0],
+            status: 'مكتمل'
+          },
+          {
+            id: 2,
+            pharmacy: 'صيدلية النور',
+            notes: '',
+            items: [
+              { id: 2, name: 'أموكسيسيلين', type: 'حبوب', price: 5000, quantity: 3 }
+            ],
+            date: new Date().toISOString().split('T')[0],
+            status: 'معلق'
+          }
+        ];
+        orders = sampleOrders;
+        localStorage.setItem('orders', JSON.stringify(orders));
+      }
+    }
+
+    function setupEventListeners() {
+      // القائمة الجانبية
+      document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+          this.classList.add('active');
+          showPage(this.dataset.page);
+        });
+      });
+
+      // ألسنة تبويب الطلبات
+      document.querySelectorAll('.orders-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          const tabId = this.dataset.tab;
+          switchOrdersTab(tabId);
+        });
+      });
+
+      // النماذج
+      document.getElementById('add-product-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addNewProduct();
+      });
+
+      document.getElementById('create-invoice').addEventListener('click', createInvoice);
+      document.getElementById('send-whatsapp').addEventListener('click', sendInvoiceToWhatsApp);
+      document.getElementById('search-products').addEventListener('input', function(e) {
+        filterProducts(e.target.value);
+      });
+      document.getElementById('cancel-edit-medicine').addEventListener('click', closeEditModal);
+      document.getElementById('save-medicine-changes').addEventListener('click', saveMedicineEdit);
+      
+      // مرشحات المنتجات
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          filterProductsByType(this.dataset.filter);
+        });
+      });
+      
+      // النسخ الاحتياطي والاستعادة
+      document.getElementById('backup-data').addEventListener('click', backupData);
+      document.getElementById('restore-btn').addEventListener('click', function() {
+        document.getElementById('restore-data').click();
+      });
+      document.getElementById('restore-data').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+          restoreData(e.target.files[0]);
+        }
+      });
+      
+      // نظام التقارير
+      document.getElementById('generate-report').addEventListener('click', generateReport);
+      document.getElementById('print-report').addEventListener('click', printReport);
+      document.getElementById('export-report').addEventListener('click', exportReportToExcel);
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      
+      switch(pageId) {
+        case 'products': loadProducts(); break;
+        case 'manage-medicines': loadManageMedicines(); break;
+        case 'orders': loadOrders(); break;
+        case 'inventory': updateStats(); break;
+        case 'reports': 
+          // لا نقوم بتحميل التقرير تلقائياً، ينتظر المستخدم
+          break;
+      }
+    }
+
+    function switchOrdersTab(tabId) {
+      document.querySelectorAll('.orders-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.orders-tab-content').forEach(content => content.classList.remove('active'));
+      
+      document.querySelector(`.orders-tab[data-tab="${tabId}"]`).classList.add('active');
+      document.getElementById(`${tabId}-orders-tab`).classList.add('active');
+    }
+
+    // التحقق من الصلاحيات
+    function checkPermission(action) {
+      return userRoles[currentUser.role].includes(action);
+    }
+
+    // التحقق من صحة البيانات المدخلة
+    function validateProductData(product) {
+      const errors = [];
+      
+      if (!product.name || product.name.trim().length < 2) {
+        errors.push('اسم المنتج يجب أن يكون على الأقل حرفين');
+      }
+      
+      if (product.price <= 0) {
+        errors.push('السعر يجب أن يكون أكبر من صفر');
+      }
+      
+      if (product.stock < 0) {
+        errors.push('الكمية لا يمكن أن تكون سالبة');
+      }
+      
+      return errors;
+    }
+
+    // إدارة المنتجات
+    function loadProducts() {
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = '';
+
+      if (products.length === 0) {
+        grid.innerHTML = '<p style="text-align:center;padding:40px;color:#666">لا توجد أدوية متاحة</p>';
+        return;
+      }
+
+      products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img class="card-img" src="${normalizeImageUrl(product.image)}" alt="${product.name}">
+          <div class="card-body">
+            <div class="card-title">${product.name}</div>
+            <div class="card-meta">
+              <div class="card-price">${product.price} د.ع</div>
+              <div class="card-type badge">${product.type || '—'}</div>
+            </div>
+            <div class="quantity-controls" style="margin-top:10px">
+              <button class="quantity-btn minus" data-id="${product.id}">-</button>
+              <input class="quantity-input" data-id="${product.id}" type="number" value="1" min="1">
+              <button class="quantity-btn plus" data-id="${product.id}">+</button>
+            </div>
+            <button class="btn btn-primary add-to-cart" data-id="${product.id}" style="width:100%;margin-top:8px">إضافة إلى السلة</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      setupProductEventListeners();
+    }
+
+    function setupProductEventListeners() {
+      document.querySelectorAll('.add-to-cart').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const productId = parseInt(this.dataset.id);
+          const quantityInput = document.querySelector(`.quantity-input[data-id="${productId}"]`);
+          const quantity = parseInt(quantityInput.value) || 1;
+          addToCart(productId, quantity);
+        });
+      });
+
+      document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const productId = parseInt(this.dataset.id);
+          const input = document.querySelector(`.quantity-input[data-id="${productId}"]`);
+          input.value = parseInt(input.value) + 1;
+        });
+      });
+
+      document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const productId = parseInt(this.dataset.id);
+          const input = document.querySelector(`.quantity-input[data-id="${productId}"]`);
+          if (parseInt(input.value) > 1) {
+            input.value = parseInt(input.value) - 1;
+          }
+        });
+      });
+    }
+
+    function addNewProduct() {
+      const name = document.getElementById('product-name').value.trim();
+      const type = document.getElementById('product-type').value;
+      const price = parseFloat(document.getElementById('product-price').value) || 0;
+      const stock = parseInt(document.getElementById('product-stock').value) || 0;
+      const imageInput = document.getElementById('product-image');
+
+      // التحقق من الصلاحيات
+      if (!checkPermission('add')) {
+        showNotification('ليس لديك صلاحية لإضافة منتجات', 'error');
+        return;
+      }
+
+      // التحقق من صحة البيانات
+      const validationErrors = validateProductData({ name, price, stock });
+      if (validationErrors.length > 0) {
+        validationErrors.forEach(error => showNotification(error, 'error'));
+        return;
+      }
+
+      if (!name || !type || price <= 0 || stock < 0) {
+        showNotification('يرجى ملء جميع الحقول بشكل صحيح', 'error');
+        return;
+      }
+
+      let imageUrl = 'https://via.placeholder.com/400x300?text=دواء';
+
+      if (imageInput && imageInput.files && imageInput.files[0]) {
+        // compress before saving (max 1200x1200, quality 0.75)
+        compressImage(imageInput.files[0], 1200, 1200, 0.75)
+          .then(dataUrl => saveProduct(name, type, price, stock, dataUrl || imageUrl))
+          .catch(() => {
+            // fallback to reading original if compression fails
+            const reader = new FileReader();
+            reader.onload = e => saveProduct(name, type, price, stock, e.target.result);
+            reader.readAsDataURL(imageInput.files[0]);
+          });
+      } else {
+        saveProduct(name, type, price, stock, imageUrl);
+      }
+    }
+
+    function saveProduct(name, type, price, stock, image) {
+      const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+      const newProduct = { id: newId, name, type, price, stock, image };
+      
+      products.push(newProduct);
+      localStorage.setItem('products', JSON.stringify(products));
+      
+      document.getElementById('add-product-form').reset();
+      loadProducts();
+      loadManageMedicines();
+      updateStats();
+      showNotification('تم إضافة الدواء بنجاح', 'success');
+    }
+
+    // إدارة السلة
+    function addToCart(productId, quantity) {
+      const product = products.find(p => p.id === productId);
+      if (!product) {
+        showNotification('المنتج غير موجود', 'error');
+        return;
+      }
+
+      if (product.stock < quantity) {
+        showNotification(`الكمية المتاحة: ${product.stock} فقط`, 'error');
+        return;
+      }
+
+      const existingItem = cart.find(item => item.id === productId);
+      if (existingItem) {
+        if (existingItem.quantity + quantity > product.stock) {
+          showNotification('تجاوزت الكمية المتاحة في المخزون', 'error');
+          return;
+        }
+        existingItem.quantity += quantity;
+      } else {
+        // Do NOT store large data URLs / full images inside cart to avoid localStorage quota issues.
+        cart.push({
+          id: product.id,
+          name: product.name,
+          type: product.type,
+          price: product.price,
+          quantity: quantity
+        });
+      }
+
+      safeSave('cart', cart);
+      updateCart();
+      showNotification('تمت الإضافة إلى السلة', 'success');
+    }
+
+    function updateCart() {
+      const container = document.getElementById('cart-items');
+      container.innerHTML = '';
+
+      if (cart.length === 0) {
+        container.innerHTML = '<p style="text-align:center;padding:40px;color:#666">السلة فارغة</p>';
+        document.getElementById('cart-subtotal').textContent = '0.00';
+        document.getElementById('cart-total').textContent = '0.00';
+        return;
+      }
+
+      let subtotal = 0;
+
+      cart.forEach(item => {
+        const productRef = products.find(p => p.id === item.id) || {};
+        const itemPrice = item.price || productRef.price || 0;
+        const itemTotal = itemPrice * item.quantity;
+        subtotal += itemTotal;
+
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+        cartItem.innerHTML = `
+          <div class="cart-item-info">
+            <img class="cart-item-img" src="${normalizeImageUrl(productRef.image)}" alt="${item.name}">
+            <div>
+              <h4>${item.name}</h4>
+              <div>${item.type}</div>
+              <div class="cart-item-price">${itemPrice} د.ع</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:15px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <button class="quantity-btn minus-cart" data-id="${item.id}">-</button>
+              <input class="cart-quantity" data-id="${item.id}" type="number" value="${item.quantity}" min="1" style="width:60px">
+              <button class="quantity-btn plus-cart" data-id="${item.id}">+</button>
+            </div>
+            <div style="font-weight:bold">${itemTotal.toFixed(2)} د.ع</div>
+            <button class="btn btn-danger remove-from-cart" data-id="${item.id}">حذف</button>
+          </div>
+        `;
+        container.appendChild(cartItem);
+      });
+
+      // tax hidden per requirement -> do not show tax in UI
+      const total = subtotal;
+      document.getElementById('cart-subtotal').textContent = subtotal.toFixed(2);
+      document.getElementById('cart-total').textContent = total.toFixed(2);
+
+      setupCartEventListeners();
+    }
+
+    function setupCartEventListeners() {
+      document.querySelectorAll('.remove-from-cart').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const productId = parseInt(this.dataset.id);
+          removeFromCart(productId);
+        });
+      });
+
+      document.querySelectorAll('.plus-cart').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const productId = parseInt(this.dataset.id);
+          const item = cart.find(i => i.id === productId);
+          const product = products.find(p => p.id === productId);
+          
+          if (item && product && item.quantity < product.stock) {
+            item.quantity++;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+          } else {
+            showNotification('لا توجد كمية كافية في المخزون', 'error');
+          }
+        });
+      });
+
+      document.querySelectorAll('.minus-cart').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const productId = parseInt(this.dataset.id);
+          const item = cart.find(i => i.id === productId);
+          
+          if (item && item.quantity > 1) {
+            item.quantity--;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+          }
+        });
+      });
+
+      document.querySelectorAll('.cart-quantity').forEach(input => {
+        input.addEventListener('change', function() {
+          const productId = parseInt(this.dataset.id);
+          const newQuantity = parseInt(this.value) || 1;
+          const item = cart.find(i => i.id === productId);
+          const product = products.find(p => p.id === productId);
+          
+          if (item && product) {
+            if (newQuantity <= product.stock) {
+              item.quantity = newQuantity;
+              localStorage.setItem('cart', JSON.stringify(cart));
+              updateCart();
+            } else {
+              showNotification('تجاوزت الكمية المتاحة في المخزون', 'error');
+              this.value = item.quantity;
+            }
+          }
+        });
+      });
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.id !== productId);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCart();
+      showNotification('تم حذف المنتج من السلة', 'success');
+    }
+
+    // إدارة الطلبات
+    function createInvoice() {
+      const pharmacy = document.getElementById('pharmacy-name').value.trim();
+      const notes = document.getElementById('order-notes').value.trim();
+      
+      if (!pharmacy) {
+        showNotification('يرجى إدخال اسم الصيدلية', 'error');
+        return;
+      }
+      
+      if (cart.length === 0) {
+        showNotification('السلة فارغة', 'error');
+        return;
+      }
+      
+      const newOrder = {
+        id: orders.length > 0 ? Math.max(...orders.map(o => o.id)) + 1 : 1,
+        pharmacy: pharmacy,
+        notes: notes,
+        items: [...cart],
+        date: new Date().toISOString().split('T')[0],
+        status: 'معلق'
+      };
+      
+      orders.push(newOrder);
+      localStorage.setItem('orders', JSON.stringify(orders));
+      
+      cart = [];
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCart();
+      
+      document.getElementById('pharmacy-name').value = '';
+      document.getElementById('order-notes').value = '';
+      document.getElementById('whatsapp-number').value = '';
+      
+      showNotification('تم إنشاء الفاتورة بنجاح', 'success');
+      printInvoice(newOrder);
+      loadOrders();
+      updateStats();
+    }
+
+    function loadOrders() {
+      loadPendingOrders();
+      loadCompletedOrders();
+      loadReturnedOrders();
+    }
+
+    function loadPendingOrders() {
+      const table = document.getElementById('pending-orders-table');
+      const pendingOrders = orders.filter(order => order.status === 'معلق');
+      
+      table.innerHTML = '';
+      
+      if (pendingOrders.length === 0) {
+        table.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#666">لا توجد طلبات معلقة</td></tr>';
+        return;
+      }
+      
+      pendingOrders.forEach(order => {
+        const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${order.id}</td>
+          <td>${order.pharmacy}</td>
+          <td>${order.date}</td>
+          <td>${total.toFixed(2)} د.ع</td>
+          <td><span class="status-badge status-pending">معلق</span></td>
+          <td>
+            <button class="btn btn-success complete-order" data-id="${order.id}">تم التجهيز</button>
+            <button class="btn btn-primary view-order" data-id="${order.id}">عرض</button>
+            <button class="btn btn-danger delete-order" data-id="${order.id}">حذف</button>
+          </td>
+        `;
+        table.appendChild(row);
+      });
+      
+      document.querySelectorAll('.complete-order').forEach(btn => {
+        btn.addEventListener('click', function() {
+          completeOrder(parseInt(this.dataset.id));
+        });
+      });
+      
+      document.querySelectorAll('.view-order').forEach(btn => {
+        btn.addEventListener('click', function() {
+          viewOrder(parseInt(this.dataset.id));
+        });
+      });
+      
+      document.querySelectorAll('.delete-order').forEach(btn => {
+        btn.addEventListener('click', function() {
+          deleteOrder(parseInt(this.dataset.id));
+        });
+      });
+    }
+
+    function loadCompletedOrders() {
+      const table = document.getElementById('completed-orders-table');
+      const completedOrders = orders.filter(order => order.status === 'مكتمل');
+      
+      table.innerHTML = '';
+      
+      if (completedOrders.length === 0) {
+        table.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#666">لا توجد طلبات مكتملة</td></tr>';
+        return;
+      }
+      
+      completedOrders.forEach(order => {
+        const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${order.id}</td>
+          <td>${order.pharmacy}</td>
+          <td>${order.date}</td>
+          <td>${total.toFixed(2)} د.ع</td>
+          <td><span class="status-badge status-completed">مكتمل</span></td>
+          <td>
+            <button class="btn btn-warning return-order" data-id="${order.id}">استرجاع</button>
+            <button class="btn btn-primary view-order" data-id="${order.id}">عرض</button>
+          </td>
+        `;
+        table.appendChild(row);
+      });
+      
+      document.querySelectorAll('.return-order').forEach(btn => {
+        btn.addEventListener('click', function() {
+          returnOrder(parseInt(this.dataset.id));
+        });
+      });
+      
+      document.querySelectorAll('.view-order').forEach(btn => {
+        btn.addEventListener('click', function() {
+          viewOrder(parseInt(this.dataset.id));
+        });
+      });
+    }
+
+    function loadReturnedOrders() {
+      const table = document.getElementById('returned-orders-table');
+      const returnedOrders = orders.filter(order => order.status === 'مسترجعة');
+      
+      table.innerHTML = '';
+      
+      if (returnedOrders.length === 0) {
+        table.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#666">لا توجد طلبات مسترجعة</td></tr>';
+        return;
+      }
+      
+      returnedOrders.forEach(order => {
+        const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${order.id}</td>
+          <td>${order.pharmacy}</td>
+          <td>${order.date}</td>
+          <td>${total.toFixed(2)} د.ع</td>
+          <td><span class="status-badge status-returned">مسترجعة</span></td>
+          <td>
+            <button class="btn btn-primary view-order" data-id="${order.id}">عرض</button>
+            <button class="btn btn-danger delete-order" data-id="${order.id}">حذف</button>
+          </td>
+        `;
+        table.appendChild(row);
+      });
+      
+      document.querySelectorAll('.view-order').forEach(btn => {
+        btn.addEventListener('click', function() {
+          viewOrder(parseInt(this.dataset.id));
+        });
+      });
+      
+      document.querySelectorAll('.delete-order').forEach(btn => {
+        btn.addEventListener('click', function() {
+          deleteOrder(parseInt(this.dataset.id));
+        });
+      });
+    }
+
+    function completeOrder(orderId) {
+      if (!confirm('هل أنت متأكد من أن الطلبية قد تم تجهيزها؟ سيتم خصم المواد من المخزون.')) return;
+      
+      const orderIndex = orders.findIndex(order => order.id === orderId);
+      if (orderIndex === -1) return;
+      
+      const order = orders[orderIndex];
+      
+      // التحقق من توفر المخزون
+      for (const item of order.items) {
+        const product = products.find(p => p.id === item.id);
+        if (!product || product.stock < item.quantity) {
+          showNotification(`الكمية غير كافية من ${item.name}`, 'error');
+          return;
+        }
+      }
+      
+      // خصم المواد من المخزون
+      order.items.forEach(item => {
+        const product = products.find(p => p.id === item.id);
+        if (product) {
+          product.stock -= item.quantity;
+        }
+      });
+      
+      // تحديث حالة الطلب
+      orders[orderIndex].status = 'مكتمل';
+      orders[orderIndex].completedDate = new Date().toISOString().split('T')[0];
+      
+      localStorage.setItem('products', JSON.stringify(products));
+      localStorage.setItem('orders', JSON.stringify(orders));
+      
+      loadOrders();
+      updateStats();
+      showNotification('تم تحديث حالة الطلبية إلى مكتملة', 'success');
+    }
+
+    function returnOrder(orderId) {
+      if (!confirm('هل أنت متأكد من استرجاع هذه الطلبية؟ سيتم إعادة المواد إلى المخزون.')) return;
+      
+      const orderIndex = orders.findIndex(order => order.id === orderId);
+      if (orderIndex === -1) return;
+      
+      const order = orders[orderIndex];
+      
+      // إعادة المواد إلى المخزون
+      order.items.forEach(item => {
+        const product = products.find(p => p.id === item.id);
+        if (product) {
+          product.stock += item.quantity;
+        }
+      });
+      
+      // تحديث حالة الطلب
+      orders[orderIndex].status = 'مسترجعة';
+      orders[orderIndex].returnedDate = new Date().toISOString().split('T')[0];
+      
+      localStorage.setItem('products', JSON.stringify(products));
+      localStorage.setItem('orders', JSON.stringify(orders));
+      
+      loadOrders();
+      updateStats();
+      showNotification('تم استرجاع الطلبية وإعادة المواد إلى المخزون', 'success');
+    }
+
+    function deleteOrder(orderId) {
+      if (!confirm('هل أنت متأكد من حذف هذه الطلبية؟')) return;
+      
+      orders = orders.filter(order => order.id !== orderId);
+      localStorage.setItem('orders', JSON.stringify(orders));
+      loadOrders();
+      updateStats();
+      showNotification('تم حذف الطلبية', 'success');
+    }
+
+    function viewOrder(orderId) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+      printInvoice(order);
+    }
+
+    function loadManageMedicines() {
+      const table = document.getElementById('manage-medicines-table');
+      table.innerHTML = '';
+
+      products.forEach(product => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><img src="${normalizeImageUrl(product.image)}" style="width:50px;height:50px;object-fit:cover" alt="${product.name}"></td>
+          <td>${product.name}</td>
+          <td>${product.type}</td>
+          <td>${product.price} د.ع</td>
+          <td>${product.stock}</td>
+          <td>
+            <button class="btn btn-primary edit-medicine" data-id="${product.id}">تعديل</button>
+            <button class="btn btn-danger delete-medicine" data-id="${product.id}">حذف</button>
+          </td>
+        `;
+        table.appendChild(row);
+      });
+
+      document.querySelectorAll('.edit-medicine').forEach(btn => {
+        btn.addEventListener('click', function() {
+          openEditModal(parseInt(this.dataset.id));
+        });
+      });
+
+      document.querySelectorAll('.delete-medicine').forEach(btn => {
+        btn.addEventListener('click', function() {
+          deleteMedicine(parseInt(this.dataset.id));
+        });
+      });
+    }
+
+    function openEditModal(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      
+      currentEditingMedicineId = productId;
+      document.getElementById('edit-medicine-name').value = product.name;
+      document.getElementById('edit-medicine-type').value = product.type;
+      document.getElementById('edit-medicine-price').value = product.price;
+      document.getElementById('edit-medicine-stock').value = product.stock;
+      document.getElementById('edit-medicine-modal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-medicine-modal').style.display = 'none';
+      currentEditingMedicineId = null;
+    }
+
+    function saveMedicineEdit() {
+      if (!currentEditingMedicineId) return;
+      
+      const name = document.getElementById('edit-medicine-name').value.trim();
+      const type = document.getElementById('edit-medicine-type').value.trim();
+      const price = parseFloat(document.getElementById('edit-medicine-price').value) || 0;
+      const stock = parseInt(document.getElementById('edit-medicine-stock').value) || 0;
+      const imageInput = document.getElementById('edit-medicine-image');
+
+      // التحقق من الصلاحيات
+      if (!checkPermission('edit')) {
+        showNotification('ليس لديك صلاحية لتعديل المنتجات', 'error');
+        return;
+      }
+
+      // التحقق من صحة البيانات
+      const validationErrors = validateProductData({ name, price, stock });
+      if (validationErrors.length > 0) {
+        validationErrors.forEach(error => showNotification(error, 'error'));
+        return;
+      }
+
+      if (!name || !type || price <= 0 || stock < 0) {
+        showNotification('يرجى ملء جميع الحقول بشكل صحيح', 'error');
+        return;
+      }
+      
+      const productIndex = products.findIndex(p => p.id === currentEditingMedicineId);
+      if (productIndex === -1) return;
+
+      if (imageInput && imageInput.files && imageInput.files[0]) {
+        compressImage(imageInput.files[0], 1200, 1200, 0.75)
+          .then(dataUrl => updateProduct(productIndex, name, type, price, stock, dataUrl || products[productIndex].image))
+          .catch(() => {
+            const reader = new FileReader();
+            reader.onload = e => updateProduct(productIndex, name, type, price, stock, e.target.result);
+            reader.readAsDataURL(imageInput.files[0]);
+          });
+      } else {
+        updateProduct(productIndex, name, type, price, stock, products[productIndex].image);
+      }
+    }
+
+    function updateProduct(index, name, type, price, stock, image) {
+      products[index] = {
+        ...products[index],
+        name: name,
+        type: type,
+        price: price,
+        stock: stock,
+        image: image
+      };
+      
+      localStorage.setItem('products', JSON.stringify(products));
+      loadProducts();
+      loadManageMedicines();
+      closeEditModal();
+      updateStats();
+      showNotification('تم تحديث الدواء بنجاح', 'success');
+    }
+
+    function deleteMedicine(productId) {
+      if (!checkPermission('delete')) {
+        showNotification('ليس لديك صلاحية لحذف المنتجات', 'error');
+        return;
+      }
+      
+      if (!confirm('هل أنت متأكد من حذف هذا الدواء؟')) return;
+      
+      products = products.filter(p => p.id !== productId);
+      localStorage.setItem('products', JSON.stringify(products));
+      loadProducts();
+      loadManageMedicines();
+      updateStats();
+      showNotification('تم حذف الدواء بنجاح', 'success');
+    }
+
+    // الإحصائيات والتقارير
+    function updateStats() {
+      document.getElementById('total-products').textContent = products.length;
+      document.getElementById('pending-orders').textContent = orders.filter(o => o.status === 'معلق').length;
+      document.getElementById('low-stock').textContent = products.filter(p => p.stock < 10).length;
+      
+      const totalSales = orders
+        .filter(order => order.status === 'مكتمل')
+        .reduce((sum, order) => {
+          return sum + order.items.reduce((orderSum, item) => orderSum + (item.price * item.quantity), 0);
+        }, 0);
+      document.getElementById('total-sales').textContent = totalSales.toFixed(2);
+      
+      // تحديث جدول المخزون
+      const inventoryTable = document.getElementById('inventory-table');
+      inventoryTable.innerHTML = '';
+      
+      products.forEach(product => {
+        let status = '';
+        let statusColor = '';
+        
+        if (product.stock === 0) {
+          status = 'نافذ';
+          statusColor = 'red';
+        } else if (product.stock < 5) {
+          status = 'منخفض جداً';
+          statusColor = 'red';
+        } else if (product.stock < 10) {
+          status = 'منخفض';
+          statusColor = 'orange';
+        } else if (product.stock < 20) {
+          status = 'متوسط';
+          statusColor = 'blue';
+        } else {
+          status = 'جيد';
+          statusColor = 'green';
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${product.name}</td>
+          <td>${product.type}</td>
+          <td>${product.price} د.ع</td>
+          <td>${product.stock}</td>
+          <td style="color:${statusColor};font-weight:bold">${status}</td>
+        `;
+        inventoryTable.appendChild(row);
+      });
+      
+      // تحديث آخر الطلبات
+      const recentOrdersTable = document.getElementById('recent-orders');
+      recentOrdersTable.innerHTML = '';
+      
+      const recentOrders = orders.slice(-5).reverse();
+      recentOrders.forEach(order => {
+        const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        let statusBadge = '';
+        
+        switch(order.status) {
+          case 'معلق':
+            statusBadge = '<span class="status-badge status-pending">معلق</span>';
+            break;
+          case 'مكتمل':
+            statusBadge = '<span class="status-badge status-completed">مكتمل</span>';
+            break;
+          case 'مسترجعة':
+            statusBadge = '<span class="status-badge status-returned">مسترجعة</span>';
+            break;
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${order.id}</td>
+          <td>${order.pharmacy}</td>
+          <td>${order.date}</td>
+          <td>${total.toFixed(2)} د.ع</td>
+          <td>${statusBadge}</td>
+        `;
+        recentOrdersTable.appendChild(row);
+      });
+    }
+
+    // نظام التقارير المحسن
+    function generateReport() {
+      if (!checkPermission('reports')) {
+        showNotification('ليس لديك صلاحية لعرض التقارير', 'error');
+        return;
+      }
+      
+      const startDate = document.getElementById('report-start-date').value;
+      const endDate = document.getElementById('report-end-date').value;
+      
+      if (!startDate || !endDate) {
+        showNotification('يرجى تحديد تاريخ البدء والانتهاء', 'error');
+        return;
+      }
+      
+      const reportTypes = {
+        sales: document.getElementById('report-sales').checked,
+        returns: document.getElementById('report-returns').checked,
+        topSelling: document.getElementById('report-top-selling').checked,
+        leastSelling: document.getElementById('report-least-selling').checked,
+        lowStock: document.getElementById('report-low-stock').checked,
+        totalProducts: document.getElementById('report-total-products').checked,
+        totalSales: document.getElementById('report-total-sales').checked,
+        charts: document.getElementById('report-charts').checked
+      };
+      
+      let reportHTML = '<div class="report-header" style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2c7fb8; padding-bottom: 20px;">';
+      reportHTML += `<h2 style="color: #2c7fb8; margin-bottom: 10px;">تقرير نظام إدارة الأدوية</h2>`;
+      reportHTML += `<p><strong>الفترة:</strong> من ${startDate} إلى ${endDate}</p>`;
+      reportHTML += `<p><strong>تاريخ التقرير:</strong> ${new Date().toLocaleDateString('ar-EG')}</p>`;
+      reportHTML += '</div>';
+      
+      // ملخص عام
+      if (reportTypes.totalSales || reportTypes.totalProducts) {
+        reportHTML += '<div class="report-section">';
+        reportHTML += '<h3><i class="fas fa-chart-pie"></i> ملخص عام</h3>';
+        
+        const stats = calculateGeneralStats(startDate, endDate);
+        
+        if (reportTypes.totalProducts) {
+          reportHTML += `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+              <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 24px; font-weight: bold; color: #2c7fb8;">${stats.totalProducts}</div>
+                <div>إجمالي الأدوية</div>
+              </div>
+              <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 24px; font-weight: bold; color: #2ecc71;">${stats.lowStockProducts}</div>
+                <div>أدوية منخفضة المخزون</div>
+              </div>
+            </div>
+          `;
+        }
+        
+        if (reportTypes.totalSales) {
+          reportHTML += `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+              <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 24px; font-weight: bold; color: #f39c12;">${stats.completedOrders}</div>
+                <div>الطلبات المكتملة</div>
+              </div>
+              <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 24px; font-weight: bold; color: #e74c3c;">${stats.pendingOrders}</div>
+                <div>الطلبات المعلقة</div>
+              </div>
+              <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 24px; font-weight: bold; color: #9b59b6;">${stats.totalSales.toFixed(2)}</div>
+                <div>إجمالي المبيعات (د.ع)</div>
+              </div>
+            </div>
+          `;
+        }
+        
+        reportHTML += '</div>';
+      }
+      
+      // تقرير المبيعات
+      if (reportTypes.sales) {
+        reportHTML += '<div class="report-section">';
+        reportHTML += '<h3><i class="fas fa-shopping-cart"></i> تقرير المبيعات</h3>';
+        
+        const salesData = getSalesData(startDate, endDate);
+        
+        if (salesData.length > 0) {
+          reportHTML += `
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>رقم الطلب</th>
+                  <th>الصيدلية</th>
+                  <th>التاريخ</th>
+                  <th>عدد المنتجات</th>
+                  <th>المبلغ الإجمالي</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          
+          salesData.forEach(order => {
+            reportHTML += `
+              <tr>
+                <td>${order.id}</td>
+                <td>${order.pharmacy}</td>
+                <td>${order.date}</td>
+                <td>${order.itemsCount}</td>
+                <td>${order.total.toFixed(2)} د.ع</td>
+                <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+              </tr>
+            `;
+          });
+          
+          reportHTML += '</tbody></table>';
+        } else {
+          reportHTML += '<p style="text-align: center; color: #666; padding: 20px;">لا توجد مبيعات في الفترة المحددة</p>';
+        }
+        
+        reportHTML += '</div>';
+      }
+      
+      // الأدوية الأكثر مبيعاً
+      if (reportTypes.topSelling) {
+        reportHTML += '<div class="report-section">';
+        reportHTML += '<h3><i class="fas fa-trophy"></i> الأدوية الأكثر مبيعاً</h3>';
+        
+        const topSelling = getTopSellingProducts(startDate, endDate);
+        
+        if (topSelling.length > 0) {
+          reportHTML += `
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>اسم الدواء</th>
+                  <th>النوع</th>
+                  <th>الكمية المباعة</th>
+                  <th>إجمالي المبيعات</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          
+          topSelling.forEach((product, index) => {
+            reportHTML += `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${product.name}</td>
+                <td>${product.type}</td>
+                <td>${product.totalQuantity}</td>
+                <td>${product.totalSales.toFixed(2)} د.ع</td>
+              </tr>
+            `;
+          });
+          
+          reportHTML += '</tbody></table>';
+        } else {
+          reportHTML += '<p style="text-align: center; color: #666; padding: 20px;">لا توجد بيانات عن الأدوية الأكثر مبيعاً</p>';
+        }
+        
+        reportHTML += '</div>';
+      }
+      
+      // الأدوية منخفضة المخزون
+      if (reportTypes.lowStock) {
+        reportHTML += '<div class="report-section">';
+        reportHTML += '<h3><i class="fas fa-exclamation-triangle"></i> الأدوية منخفضة المخزون</h3>';
+        
+        const lowStockProducts = products.filter(p => p.stock < 10);
+        
+        if (lowStockProducts.length > 0) {
+          reportHTML += `
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>اسم الدواء</th>
+                  <th>النوع</th>
+                  <th>السعر</th>
+                  <th>الكمية المتاحة</th>
+                  <th>حالة المخزون</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          
+          lowStockProducts.forEach(product => {
+            let status = '';
+            let statusColor = '';
+            
+            if (product.stock === 0) {
+              status = 'نافذ';
+              statusColor = 'red';
+            } else if (product.stock < 5) {
+              status = 'منخفض جداً';
+              statusColor = 'red';
+            } else {
+              status = 'منخفض';
+              statusColor = 'orange';
+            }
+            
+            reportHTML += `
+              <tr>
+                <td>${product.name}</td>
+                <td>${product.type}</td>
+                <td>${product.price} د.ع</td>
+                <td>${product.stock}</td>
+                <td style="color: ${statusColor}; font-weight: bold;">${status}</td>
+              </tr>
+            `;
+          });
+          
+          reportHTML += '</tbody></table>';
+        } else {
+          reportHTML += '<p style="text-align: center; color: #666; padding: 20px;">لا توجد أدوية منخفضة المخزون</p>';
+        }
+        
+        reportHTML += '</div>';
+      }
+      
+      // إضافة الرسوم البيانية إذا تم اختيارها
+      if (reportTypes.charts) {
+        reportHTML += generateCharts(startDate, endDate);
+      }
+      
+      document.getElementById('report-results').innerHTML = reportHTML;
+      showNotification('تم توليد التقرير بنجاح', 'success');
+    }
+
+    function calculateGeneralStats(startDate, endDate) {
+      const filteredOrders = orders.filter(order => 
+        order.date >= startDate && order.date <= endDate
+      );
+      
+      return {
+        totalProducts: products.length,
+        lowStockProducts: products.filter(p => p.stock < 10).length,
+        completedOrders: filteredOrders.filter(o => o.status === 'مكتمل').length,
+        pendingOrders: filteredOrders.filter(o => o.status === 'معلق').length,
+        totalSales: filteredOrders
+          .filter(o => o.status === 'مكتمل')
+          .reduce((sum, order) => sum + order.items.reduce((orderSum, item) => 
+            orderSum + (item.price * item.quantity), 0), 0)
+      };
+    }
+
+    function getSalesData(startDate, endDate) {
+      return orders
+        .filter(order => order.date >= startDate && order.date <= endDate)
+        .map(order => ({
+          id: order.id,
+          pharmacy: order.pharmacy,
+          date: order.date,
+          itemsCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
+          total: order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+          status: order.status
+        }))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    function getTopSellingProducts(startDate, endDate) {
+      const productSales = {};
+      
+      orders
+        .filter(order => order.status === 'مكتمل' && order.date >= startDate && order.date <= endDate)
+        .forEach(order => {
+          order.items.forEach(item => {
+            if (!productSales[item.id]) {
+              productSales[item.id] = {
+                id: item.id,
+                name: item.name,
+                type: item.type,
+                totalQuantity: 0,
+                totalSales: 0
+              };
+            }
+            productSales[item.id].totalQuantity += item.quantity;
+            productSales[item.id].totalSales += item.price * item.quantity;
+          });
+        });
+      
+      return Object.values(productSales)
+        .sort((a, b) => b.totalQuantity - a.totalQuantity)
+        .slice(0, 10);
+    }
+
+    function getStatusClass(status) {
+      switch(status) {
+        case 'مكتمل': return 'status-completed';
+        case 'معلق': return 'status-pending';
+        case 'مسترجعة': return 'status-returned';
+        default: return 'status-pending';
+      }
+    }
+
+    function printReport() {
+      const reportContent = document.getElementById('report-results').innerHTML;
+      
+      if (!reportContent || reportContent.includes('انقر على "توليد التقرير"')) {
+        showNotification('يرجى توليد التقرير أولاً', 'error');
+        return;
+      }
+      
+      const printWindow = window.open('', '_blank', 'width=1000,height=700');
+      const currentDate = new Date().toLocaleDateString('ar-EG');
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="rtl">
+        <head>
+          <meta charset="utf-8">
+          <title>تقرير نظام إدارة الأدوية</title>
+          <style>
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              margin: 30px; 
+              line-height: 1.6; 
+              color: #333;
+            }
+            .print-header { 
+              text-align: center; 
+              margin-bottom: 30px; 
+              border-bottom: 3px solid #2c7fb8; 
+              padding-bottom: 20px; 
+            }
+            .print-title { 
+              font-size: 28px; 
+              font-weight: bold; 
+              margin-bottom: 10px; 
+              color: #2c7fb8; 
+            }
+            .print-date { 
+              margin-bottom: 10px; 
+              font-size: 16px;
+            }
+            .report-section { 
+              margin-bottom: 30px; 
+              page-break-inside: avoid;
+            }
+            .report-section h3 { 
+              color: #2c7fb8; 
+              margin-bottom: 15px; 
+              border-bottom: 2px solid #2c7fb8; 
+              padding-bottom: 8px; 
+              font-size: 20px;
+            }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin-top: 15px;
+              font-size: 14px;
+            }
+            table th, table td { 
+              padding: 10px 12px; 
+              text-align: right; 
+              border: 1px solid #ddd; 
+            }
+            table th { 
+              background-color: #2c7fb8; 
+              color: white; 
+              font-weight: bold;
+            }
+            .status-badge {
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-size: 12px;
+              font-weight: bold;
+            }
+            .status-completed {
+              background-color: #d1ecf1;
+              color: #0c5460;
+            }
+            .status-pending {
+              background-color: #fff3cd;
+              color: #856404;
+            }
+            .stats-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+              gap: 15px;
+              margin: 20px 0;
+            }
+            .stat-box {
+              background: #f8f9fa;
+              padding: 15px;
+              border-radius: 8px;
+              text-align: center;
+              border-right: 4px solid #2c7fb8;
+            }
+            .stat-value {
+              font-size: 24px;
+              font-weight: bold;
+              color: #2c7fb8;
+              margin-bottom: 5px;
+            }
+            @media print {
+              body { margin: 20px; }
+              .print-btn { display: none; }
+              .report-section { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-header">
+            <div class="print-title">تقرير نظام إدارة الأدوية</div>
+            <div class="print-date">شركة دجلة / الديوانية</div>
+            <div class="print-date">تاريخ التقرير: ${currentDate}</div>
+          </div>
+          ${reportContent}
+          <div style="margin-top: 40px; text-align: left; font-style: italic; color: #666;">
+            <p>تم إنشاء هذا التقرير تلقائياً من نظام إدارة مبيعات الأدوية</p>
+          </div>
+          <div class="print-btn" style="margin-top: 30px; text-align: center;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #2c7fb8; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+              طباعة التقرير
+            </button>
+          </div>
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+    }
+
+    function exportReportToExcel() {
+      showNotification('سيتم إضافة خاصية التصدير لاحقاً', 'info');
+    }
+
+    // دوال مساعدة
+    function printInvoice(order) {
+      const printWindow = window.open('', '_blank', 'width=800,height=600');
+      const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const tax = subtotal * TAX_RATE;
+      const total = subtotal + tax;
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="rtl">
+        <head>
+          <meta charset="utf-8">
+          <title>فاتورة طلبية ${order.pharmacy}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+            .invoice-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+            .invoice-title { font-size: 28px; font-weight: bold; margin-bottom: 10px; color: #2c7fb8; }
+            .pharmacy-name { font-size: 22px; margin-bottom: 10px; }
+            .invoice-details { margin-bottom: 20px; }
+            .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            .invoice-table th, .invoice-table td { border: 1px solid #ddd; padding: 10px; text-align: right; }
+            .invoice-table th { background-color: #f5f5f5; font-weight: bold; }
+            .invoice-summary { margin-top: 20px; text-align: left; }
+            .notes-section { margin-top: 20px; padding: 10px; background-color: #f9f9f9; border-radius: 5px; }
+            .print-btn { margin-top: 20px; text-align: center; }
+            @media print {
+              .print-btn { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-header">
+            <div class="invoice-title">طلبية ${order.pharmacy}</div>
+            <div class="invoice-details">
+              <div>رقم الفاتورة: ${order.id}</div>
+              <div>التاريخ: ${order.date}</div>
+            </div>
+          </div>
+          
+          <table class="invoice-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم الدواء</th>
+                <th>النوع</th>
+                <th>السعر</th>
+                <th>الكمية</th>
+                <th>المجموع</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${order.items.map((item, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${item.name}</td>
+                  <td>${item.type}</td>
+                  <td>${item.price} د.ع</td>
+                  <td>${item.quantity}</td>
+                  <td>${(item.price * item.quantity).toFixed(2)} د.ع</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <div class="invoice-summary">
+            <div>المجموع: ${subtotal.toFixed(2)} د.ع</div>
+            <div>الضريبة: ${tax.toFixed(2)} د.ع</div>
+            <div style="font-weight: bold; font-size: 18px;">الإجمالي: ${total.toFixed(2)} د.ع</div>
+          </div>
+          
+          ${order.notes ? `
+          <div class="notes-section">
+            <h3>ملاحظات التجهيز:</h3>
+            <p>${order.notes}</p>
+          </div>
+          ` : ''}
+          
+          <div class="print-btn">
+            <button onclick="window.print()">طباعة الفاتورة</button>
+          </div>
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+    }
+
+    function sendInvoiceToWhatsApp() {
+      const pharmacy = document.getElementById('pharmacy-name').value.trim();
+      const notes = document.getElementById('order-notes').value.trim();
+      const whatsapp = document.getElementById('whatsapp-number').value.trim();
+      
+      if (!pharmacy || !whatsapp || cart.length === 0) {
+        showNotification('يرجى ملء جميع الحقول المطلوبة', 'error');
+        return;
+      }
+      
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const tax = subtotal * TAX_RATE;
+      const total = subtotal + tax;
+      
+      let message = `*طلبية ${pharmacy}*\n\n`;
+      message += `*الأدوية:*\n`;
+      cart.forEach((item, index) => {
+        message += `${index + 1}. ${item.name} (${item.type}) - ${item.quantity} × ${item.price} = ${(item.price * item.quantity).toFixed(2)} د.ع\n`;
+      });
+      message += `\n*المجموع:* ${subtotal.toFixed(2)} د.ع\n`;
+      message += `*الضريبة:* ${tax.toFixed(2)} د.ع\n`;
+      message += `*الإجمالي:* ${total.toFixed(2)} د.ع\n`;
+      
+      if (notes) {
+        message += `\n*ملاحظات التجهيز:*\n${notes}`;
+      }
+      
+      const encodedMessage = encodeURIComponent(message);
+      const phoneNumber = whatsapp.replace(/[^0-9]/g, '');
+      window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+    }
+
+    function filterProducts(query) {
+      const grid = document.getElementById('products-grid');
+      const cards = grid.querySelectorAll('.card');
+      const searchTerm = query.toLowerCase().trim();
+      
+      cards.forEach(card => {
+        const productName = card.querySelector('.card-title').textContent.toLowerCase();
+        if (productName.includes(searchTerm)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function filterProductsByType(type) {
+      const grid = document.getElementById('products-grid');
+      const cards = grid.querySelectorAll('.card');
+      
+      cards.forEach(card => {
+        const productType = card.querySelector('.card-type').textContent;
+        if (type === 'all' || productType === type) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function normalizeImageUrl(url) {
+      const placeholderBase = 'https://via.placeholder.com/';
+      if (!url) return placeholderBase + '400x300?text=دواء';
+      url = String(url).trim();
+      if (/^data:/.test(url) || /^https?:\/\//.test(url)) return url;
+      // handle values like "400x300?text=دواء"
+      if (/^\d+x\d+\?.+/.test(url) || url.includes('placeholder.com')) {
+        return placeholderBase + url.replace(/^\/+/, '');
+      }
+      // if starts with "/" use origin, else avoid creating invalid host for numeric placeholders
+      if (url.startsWith('/')) return location.origin + url;
+      // fallback: treat as relative path (don't prefix "https://" blindly)
+      return url;
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.style.backgroundColor = 
+        type === 'success' ? '#2ecc71' :
+        type === 'error' ? '#e74c3c' :
+        type === 'warning' ? '#f39c12' : '#3498db';
+      notification.style.display = 'block';
+      
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000);
+    }
+
+    // Compress image file -> returns dataURL (JPEG) with given max dimensions and quality (0..1)
+    function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.7) {
+      return new Promise((resolve, reject) => {
+        if (!file) return resolve(null);
+        // use createImageBitmap when available (faster, avoids loading <img>)
+        const loadBitmap = () => {
+          if ('createImageBitmap' in window) return createImageBitmap(file);
+          return new Promise((res, rej) => {
+            const img = new Image();
+            img.onload = () => res(img);
+            img.onerror = rej;
+            img.src = URL.createObjectURL(file);
+          });
+        };
+        loadBitmap().then(imgBitmap => {
+          try {
+            const iw = imgBitmap.width || imgBitmap.naturalWidth || 1;
+            const ih = imgBitmap.height || imgBitmap.naturalHeight || 1;
+            const ratio = Math.min(1, maxWidth / iw, maxHeight / ih);
+            const w = Math.max(1, Math.round(iw * ratio));
+            const h = Math.max(1, Math.round(ih * ratio));
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(imgBitmap, 0, 0, w, h);
+            try { if (imgBitmap && imgBitmap.close) imgBitmap.close(); } catch(e){}
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(dataUrl);
+          } catch (err) { reject(err); }
+        }).catch(err => reject(err));
+      });
+    }
+
+    // وظائف النسخ الاحتياطي والاستعادة
+    function backupData() {
+      if (!checkPermission('backup')) {
+        showNotification('ليس لديك صلاحية للنسخ الاحتياطي', 'error');
+        return;
+      }
+      
+      const data = {
+        products: products,
+        orders: orders,
+        timestamp: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showNotification('تم إنشاء نسخة احتياطية بنجاح', 'success');
+    }
+
+    function restoreData(file) {
+      if (!checkPermission('backup')) {
+        showNotification('ليس لديك صلاحية لاستعادة البيانات', 'error');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (confirm('هل أنت متأكد من استعادة البيانات؟ سيتم استبدال جميع البيانات الحالية.')) {
+            products = data.products || [];
+            orders = data.orders || [];
+            localStorage.setItem('products', JSON.stringify(products));
+            localStorage.setItem('orders', JSON.stringify(orders));
+            loadProducts();
+            loadOrders();
+            updateStats();
+            showNotification('تم استعادة البيانات بنجاح', 'success');
+          }
+        } catch (error) {
+          showNotification('خطأ في استعادة البيانات', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // نظام تنبيهات المخزون المنخفض
+    function checkLowStockAlerts() {
+      const lowStockProducts = products.filter(p => p.stock < 5);
+      if (lowStockProducts.length > 0) {
+        showNotification(`هناك ${lowStockProducts.length} منتج منخفض المخزون`, 'warning');
+      }
+    }
+
+    // توليد الرسوم البيانية للتقارير
+    function generateCharts(startDate, endDate) {
+      // حساب البيانات للرسوم البيانية
+      const salesByMonth = calculateSalesByMonth(startDate, endDate);
+      const topProducts = getTopSellingProducts(startDate, endDate);
+      
+      // إنشاء رسوم بيانية مبسطة باستخدام HTML وCSS
+      let chartsHTML = `
+        <div class="charts-grid">
+          <div class="chart-container">
+            <h4>المبيعات الشهرية</h4>
+            <div style="height: 200px; display: flex; align-items: flex-end; gap: 10px; margin-top: 20px;">
+      `;
+      
+      // رسم بياني للمبيعات الشهرية
+      const maxSales = Math.max(...Object.values(salesByMonth));
+      Object.entries(salesByMonth).forEach(([month, sales]) => {
+        const height = maxSales > 0 ? (sales / maxSales) * 160 : 0;
+        chartsHTML += `
+          <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+            <div style="background: var(--primary-color); width: 30px; height: ${height}px; border-radius: 4px 4px 0 0;"></div>
+            <div style="margin-top: 5px; font-size: 12px;">${month}</div>
+            <div style="font-size: 12px; font-weight: bold;">${sales.toFixed(2)}</div>
+          </div>
+        `;
+      });
+      
+      chartsHTML += `
+            </div>
+          </div>
+          <div class="chart-container">
+            <h4>المنتجات الأكثر مبيعاً</h4>
+            <div style="margin-top: 20px;">
+      `;
+      
+      // رسم بياني للمنتجات الأكثر مبيعاً
+      topProducts.forEach((product, index) => {
+        const width = (product.totalQuantity / topProducts[0].totalQuantity) * 100;
+        chartsHTML += `
+          <div style="margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+              <span>${product.name}</span>
+              <span>${product.totalQuantity}</span>
+            </div>
+            <div style="background: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden;">
+              <div style="background: var(--success-color); height: 100%; width: ${width}%;"></div>
+            </div>
+          </div>
+        `;
+      });
+      
+      chartsHTML += `
+            </div>
+          </div>
+        </div>
+      `;
+      
+      return chartsHTML;
+    }
+
+    function calculateSalesByMonth(startDate, endDate) {
+      const salesByMonth = {};
+      const currentYear = new Date().getFullYear();
+      
+      // تهيئة الأشهر للعام الحالي
+      for (let i = 1; i <= 12; i++) {
+        salesByMonth[`${i}/${currentYear}`] = 0;
+      }
+      
+      // حساب المبيعات لكل شهر
+      orders
+        .filter(order => order.status === 'مكتمل')
+        .forEach(order => {
+          const orderDate = new Date(order.date);
+          const monthYear = `${orderDate.getMonth() + 1}/${orderDate.getFullYear()}`;
+          
+          if (orderDate.getFullYear() === currentYear) {
+            const orderTotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            salesByMonth[monthYear] += orderTotal;
+          }
+        });
+      
+      return salesByMonth;
+    }
+
+  </script>
+   <div class="footer">
+            <p>جميع الحقوق محفوظة © نظام إدارة بيع الادوية2025</p>
+            <p>تم التطوير بواسطة مصطفى الماجدي /مندوب شركة دجلة للصناعات الدوائية / محافظة الديوانية:</p>
+        </div>
+</body>
+</html>
