@@ -535,7 +535,7 @@
       padding: 15px;
       border-radius: 5px;
       color: white;
-      z-index: 1000;
+      z-index: 3000; /* فوق شاشة الدخول والنوافذ */
       max-width: 400px;
     }
     
@@ -587,9 +587,48 @@
       margin-top: 20px;
     }
     
+    /* ===== تسجيل الدخول والمستخدمون ===== */
+    .auth-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: linear-gradient(135deg, var(--primary-color), #1d5f8c);
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    #password-modal { background: rgba(0,0,0,.55); }
+    .auth-card {
+      background: #fff; border-radius: 12px; padding: 28px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.25);
+    }
+    .auth-card h2 { color: var(--primary-color); margin-bottom: 6px; font-size: 20px; text-align: center; }
+    .auth-card label { display: block; margin-bottom: 4px; font-size: 14px; }
+    /* الشعار أبيض، فنضعه على خلفية بلون الهوية */
+    .auth-logo { display: block; width: 88px; height: 88px; margin: 0 auto 12px; object-fit: contain; background: var(--primary-color); border-radius: 50%; padding: 8px; }
+    .auth-subtitle { color: #666; margin-bottom: 18px; text-align: center; font-size: 14px; }
+    .auth-error { color: var(--danger-color); min-height: 22px; margin-bottom: 8px; font-size: 14px; }
+    .auth-submit { width: 100%; padding: 10px; font-size: 16px; }
+    .user-info { display: flex; align-items: center; gap: 8px; }
+    .user-info-text { text-align: left; line-height: 1.3; }
+    .user-info-name { font-weight: bold; }
+    .user-info-role { font-size: 12px; opacity: .85; }
+    .btn-light { background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+    .btn-light:hover { background: rgba(255,255,255,.3); }
+    .users-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 15px 0 8px; }
+    .users-hint { color: #666; font-size: 13px; margin-bottom: 15px; line-height: 1.8; }
+    .user-inactive td { opacity: .55; }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+
     @media (max-width: 768px) {
       .main-content {
         grid-template-columns: 1fr;
+      }
+
+      /* عناصر الشبكة لا تتقلص تحت عرض محتواها افتراضياً، فتتجاوز الصفحة عرض الهاتف.
+         نسمح لها بالتقلص، والجداول العريضة تُمرَّر أفقياً داخل البطاقة. */
+      .main-content > * {
+        min-width: 0;
+      }
+
+      .content {
+        overflow-x: auto;
       }
       
       .sidebar {
@@ -642,6 +681,50 @@
 <body>
   <div class="notification" id="notification"></div>
 
+  <!-- شاشة تسجيل الدخول -->
+  <div id="login-screen" class="auth-overlay" style="display:none">
+    <form id="login-form" class="auth-card" autocomplete="on">
+      <img src="images/dijla.png" alt="شعار شركة دجلة" class="auth-logo">
+      <h2>نظام مبيعات أدوية شركة دجلة</h2>
+      <p class="auth-subtitle">سجّل الدخول للمتابعة</p>
+      <div class="form-group">
+        <label for="login-username">اسم المستخدم</label>
+        <input id="login-username" class="form-control" autocomplete="username" required dir="ltr">
+      </div>
+      <div class="form-group">
+        <label for="login-password">كلمة المرور</label>
+        <input id="login-password" type="password" class="form-control" autocomplete="current-password" required dir="ltr">
+      </div>
+      <div id="login-error" class="auth-error" role="alert"></div>
+      <button id="login-submit" type="submit" class="btn btn-primary auth-submit">دخول</button>
+    </form>
+  </div>
+
+  <!-- تغيير كلمة المرور -->
+  <div id="password-modal" class="auth-overlay" style="display:none">
+    <form id="password-form" class="auth-card">
+      <h2>تغيير كلمة المرور</h2>
+      <p id="password-modal-note" class="auth-subtitle">كلمة المرور الحالية مؤقتة، يرجى اختيار كلمة مرور جديدة للمتابعة.</p>
+      <div class="form-group">
+        <label for="current-password">كلمة المرور الحالية</label>
+        <input id="current-password" type="password" class="form-control" autocomplete="current-password" required dir="ltr">
+      </div>
+      <div class="form-group">
+        <label for="new-password">كلمة المرور الجديدة (8 أحرف على الأقل)</label>
+        <input id="new-password" type="password" class="form-control" autocomplete="new-password" minlength="8" required dir="ltr">
+      </div>
+      <div class="form-group">
+        <label for="confirm-password">تأكيد كلمة المرور الجديدة</label>
+        <input id="confirm-password" type="password" class="form-control" autocomplete="new-password" minlength="8" required dir="ltr">
+      </div>
+      <div id="password-error" class="auth-error" role="alert"></div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-success auth-submit">حفظ</button>
+        <button type="button" id="cancel-password-change" class="btn btn-danger auth-submit">إلغاء</button>
+      </div>
+    </form>
+  </div>
+
   <header>
     <div class="container">
       <div class="header-content">
@@ -652,9 +735,17 @@
             <img src="images/dijla.png" alt="شعار شركة دجلة" style="height:80px;object-fit:contain">
           </div>
           <div class="user-controls">
-            <button id="backup-data" class="btn btn-primary">نسخ احتياطي</button>
+            <button id="backup-data" class="btn btn-primary" data-perm="backup">نسخ احتياطي</button>
             <input type="file" id="restore-data" accept=".json" style="display:none">
-            <button id="restore-btn" class="btn btn-warning">استعادة بيانات</button>
+            <button id="restore-btn" class="btn btn-warning" data-perm="backup">استعادة بيانات</button>
+          </div>
+          <div class="user-info">
+            <div class="user-info-text">
+              <div id="current-user-name" class="user-info-name"></div>
+              <div id="current-user-role" class="user-info-role"></div>
+            </div>
+            <button id="change-password-btn" class="btn btn-light" title="تغيير كلمة المرور"><i class="fas fa-key"></i></button>
+            <button id="logout-btn" class="btn btn-light" title="تسجيل الخروج"><i class="fas fa-sign-out-alt"></i> خروج</button>
           </div>
         </div>
       </div>
@@ -668,12 +759,13 @@
         <ul>
           <li><a href="#" class="sidebar-link active" data-page="home"><i class="fas fa-home"></i> الرئيسية</a></li>
           <li><a href="#" class="sidebar-link" data-page="products"><i class="fas fa-pills"></i> الأدوية</a></li>
-          <li><a href="#" class="sidebar-link" data-page="add-product"><i class="fas fa-plus-circle"></i> إضافة دواء</a></li>
+          <li><a href="#" class="sidebar-link" data-page="add-product" data-perm="products:write"><i class="fas fa-plus-circle"></i> إضافة دواء</a></li>
           <li><a href="#" class="sidebar-link" data-page="manage-medicines"><i class="fas fa-edit"></i> إدارة الأدوية</a></li>
           <li><a href="#" class="sidebar-link" data-page="cart"><i class="fas fa-shopping-cart"></i> سلة المشتريات</a></li>
           <li><a href="#" class="sidebar-link" data-page="orders"><i class="fas fa-clipboard-list"></i> الطلبات</a></li>
           <li><a href="#" class="sidebar-link" data-page="inventory"><i class="fas fa-boxes"></i> المخزون</a></li>
-          <li><a href="#" class="sidebar-link" data-page="reports"><i class="fas fa-chart-bar"></i> التقارير</a></li>
+          <li><a href="#" class="sidebar-link" data-page="reports" data-perm="reports"><i class="fas fa-chart-bar"></i> التقارير</a></li>
+          <li><a href="#" class="sidebar-link" data-page="users" data-perm="users"><i class="fas fa-users-cog"></i> المستخدمون</a></li>
         </ul>
       </aside>
 
@@ -855,7 +947,7 @@
                   <input id="whatsapp-number" class="form-control" placeholder="رقم واتساب (مثال: 9647712345678)">
                 </div>
                 <div style="display:flex;gap:10px;margin-top:15px">
-                  <button id="create-invoice" class="btn btn-success">إنشاء فاتورة</button>
+                  <button id="create-invoice" class="btn btn-success" data-perm="orders:create">إنشاء فاتورة</button>
                   <button id="send-whatsapp" class="btn btn-primary">إرسال عبر واتساب</button>
                 </div>
               </div>
@@ -1013,6 +1105,42 @@
             </div>
           </div>
         </section>
+
+        <!-- صفحة المستخدمين (للمدير) -->
+        <section id="users" class="page">
+          <h2>المستخدمون</h2>
+          <form id="add-user-form" class="users-form">
+            <input id="new-user-username" class="form-control" placeholder="اسم المستخدم (بالإنجليزية)" required dir="ltr" pattern="[A-Za-z0-9_.\-]{3,32}" title="3-32 حرفاً إنجليزياً أو أرقاماً أو . _ -">
+            <input id="new-user-display" class="form-control" placeholder="الاسم الظاهر" required maxlength="60">
+            <select id="new-user-role" class="form-control" required>
+              <option value="cashier">مندوب / كاشير</option>
+              <option value="manager">مشرف</option>
+              <option value="admin">مدير النظام</option>
+            </select>
+            <input id="new-user-password" type="password" class="form-control" placeholder="كلمة مرور مؤقتة (8+)" minlength="8" required dir="ltr" autocomplete="new-password">
+            <button type="submit" class="btn btn-success">إضافة مستخدم</button>
+          </form>
+          <p class="users-hint">
+            <b>مندوب / كاشير:</b> عرض الأدوية وإنشاء الطلبات ·
+            <b>مشرف:</b> إضافة وتعديل الأدوية وتجهيز واسترجاع الطلبات والتقارير ·
+            <b>مدير النظام:</b> كل الصلاحيات مع حذف الأدوية والنسخ الاحتياطي وإدارة المستخدمين.
+            كلمة المرور التي تضعها مؤقتة ويُطلب من المستخدم تغييرها عند أول دخول.
+          </p>
+          <div style="overflow:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>اسم المستخدم</th>
+                  <th>الاسم</th>
+                  <th>الدور</th>
+                  <th>الحالة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="users-table"></tbody>
+            </table>
+          </div>
+        </section>
       </main>
     </div>
   </div>
@@ -1066,54 +1194,6 @@
       }
     }
 
-    // نظام صلاحيات المستخدمين
-    const userRoles = {
-      admin: ['view', 'add', 'edit', 'delete', 'reports', 'backup'],
-      manager: ['view', 'add', 'edit', 'reports'],
-      cashier: ['view', 'add']
-    };
-    
-    let currentUser = {
-      name: 'مدير النظام',
-      role: 'admin'
-    };
-    
-    // safe localStorage setter (falls back to sessionStorage)
-    function safeSave(key, valueObj) {
-      try {
-        localStorage.setItem(key, JSON.stringify(valueObj));
-        return true;
-      } catch (e) {
-        console.warn('localStorage setItem failed', e);
-        try {
-          sessionStorage.setItem(key, JSON.stringify(valueObj));
-          return true;
-        } catch (e2) {
-          console.error('sessionStorage setItem failed', e2);
-          showNotification('لا يمكن حفظ البيانات محلياً (سعة التخزين ممتلئة)', 'error');
-          return false;
-        }
-      }
-    }
-
-    // تهيئة التطبيق
-    document.addEventListener('DOMContentLoaded', function() {
-      loadDataFromStorage();
-      setupEventListeners();
-      initializeSampleData();
-      updateStats();
-      loadProducts();
-      loadOrders();
-      updateCart();
-      checkLowStockAlerts();
-      
-      // تعيين التاريخ الافتراضي لبداية الشهر
-      const startDate = new Date();
-      startDate.setDate(1);
-      document.getElementById('report-start-date').value = toLocalISODate(startDate);
-      document.getElementById('report-end-date').value = todayISO();
-    });
-
     // توحيد شكل السجلات: الأرقام أرقام والنصوص نصوص
     // (يحمي من بيانات قديمة أو ملف نسخة احتياطية معدَّل يدوياً)
     const toNumber = v => (Number.isFinite(Number(v)) ? Number(v) : 0);
@@ -1156,55 +1236,392 @@
 
     const onlyObjects = arr => (Array.isArray(arr) ? arr.filter(x => x && typeof x === 'object') : []);
 
-    function loadDataFromStorage() {
-      products = onlyObjects(readStoredArray('products')).map(normalizeProduct);
-      cart = onlyObjects(readStoredArray('cart')).map(normalizeItem);
-      orders = onlyObjects(readStoredArray('orders')).map(normalizeOrder);
+
+    // ===== حالات الطلب (رموز ثابتة يرسلها الخادم) وأسماؤها المعروضة =====
+    const STATUS = { PENDING: 'pending', COMPLETED: 'completed', RETURNED: 'returned' };
+    const STATUS_LABELS = { pending: 'معلق', completed: 'مكتمل', returned: 'مسترجعة' };
+    const statusLabel = s => STATUS_LABELS[s] || s;
+
+    // ===== الصلاحيات: تُفرض على الخادم، وتُستخدم هنا فقط لإخفاء ما لا يحق للمستخدم =====
+    const PERM = {
+      PRODUCTS_WRITE: 'products:write',
+      PRODUCTS_DELETE: 'products:delete',
+      ORDERS_CREATE: 'orders:create',
+      ORDERS_MANAGE: 'orders:manage',
+      REPORTS: 'reports',
+      BACKUP: 'backup',
+      USERS: 'users'
+    };
+
+    let currentUser = null;
+    let canManage = false; // صلاحية إدارة الطلبات، تُحدَّث عند رسم الجداول // يُملأ من /api/auth/me بعد الدخول
+
+    // ===== الاتصال بالخادم =====
+    class ApiError extends Error {
+      constructor(status, message, details) {
+        super(message);
+        this.status = status;
+        this.details = details;
+      }
     }
 
-    function initializeSampleData() {
-      if (products.length === 0) {
-        const sampleProducts = [
-          { id: 1, name: 'باراسيتامول', type: 'حبوب', price: 2500, stock: 50, image: '' },
-          { id: 2, name: 'أموكسيسيلين', type: 'حبوب', price: 5000, stock: 30, image: '' },
-          { id: 3, name: 'فيتامين سي', type: 'حبوب', price: 3000, stock: 20, image: '' },
-          { id: 4, name: 'مرهم مضاد حيوي', type: 'مرهم', price: 7500, stock: 15, image: '' }
-        ];
-        products = sampleProducts;
-        localStorage.setItem('products', JSON.stringify(products));
+    /**
+     * طلب إلى الـ API. الجلسة في ملف تعريف httpOnly يرسله المتصفح تلقائياً.
+     * body: كائن (يُرسل JSON) أو FormData (للصور).
+     */
+    async function api(path, { method = 'GET', body } = {}) {
+      const opts = { method, credentials: 'same-origin', headers: {} };
+      if (body instanceof FormData) {
+        opts.body = body;
+      } else if (body !== undefined) {
+        opts.headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(body);
       }
-      
-      // إضافة بيانات تجريبية للطلبات إذا لم تكن موجودة
-      if (orders.length === 0) {
-        const sampleOrders = [
-          {
-            id: 1,
-            pharmacy: 'صيدلية الحياة',
-            notes: 'تجهيز سريع',
-            items: [
-              { id: 1, name: 'باراسيتامول', type: 'حبوب', price: 2500, quantity: 2 },
-              { id: 3, name: 'فيتامين سي', type: 'حبوب', price: 3000, quantity: 1 }
-            ],
-            date: todayISO(),
-            status: 'مكتمل'
-          },
-          {
-            id: 2,
-            pharmacy: 'صيدلية النور',
-            notes: '',
-            items: [
-              { id: 2, name: 'أموكسيسيلين', type: 'حبوب', price: 5000, quantity: 3 }
-            ],
-            date: todayISO(),
-            status: 'معلق'
+      let res;
+      try {
+        res = await fetch('/api' + path, opts);
+      } catch (e) {
+        throw new ApiError(0, 'تعذّر الاتصال بالخادم، تأكد من تشغيله ومن الاتصال بالشبكة');
+      }
+      let data = null;
+      try { data = await res.json(); } catch (e) { /* رد بدون JSON */ }
+      if (!res.ok) {
+        const message = (data && data.error) || `خطأ من الخادم (${res.status})`;
+        if (res.status === 401 && !path.startsWith('/auth/login')) onSessionExpired(message);
+        throw new ApiError(res.status, message, data && data.details);
+      }
+      return data;
+    }
+
+    /** يعرض رسالة الخطأ للمستخدم (مع أول تفاصيل التحقق إن وُجدت). */
+    function showApiError(err, fallback = 'حدث خطأ') {
+      if (err && err.status === 401) return; // شاشة الدخول ظاهرة مسبقاً
+      const detail = err && err.details && err.details[0] ? `: ${err.details[0].message}` : '';
+      showNotification(((err && err.message) || fallback) + detail, 'error');
+      if (!(err instanceof ApiError)) console.error(err);
+    }
+
+    async function refreshData() {
+      const [p, o] = await Promise.all([api('/products'), api('/orders')]);
+      products = onlyObjects(p).map(normalizeProduct);
+      orders = onlyObjects(o).map(normalizeOrder);
+    }
+
+    function renderAll() {
+      updateStats();
+      loadProducts();
+      loadManageMedicines();
+      loadOrders();
+      updateCart();
+    }
+
+    async function refreshAndRender() {
+      try {
+        await refreshData();
+        renderAll();
+      } catch (err) {
+        showApiError(err, 'تعذّر تحميل البيانات');
+      }
+    }
+
+    function checkPermission(permission) {
+      return Boolean(currentUser && currentUser.permissions.includes(permission));
+    }
+
+    // ===== الجلسة وتسجيل الدخول =====
+    function showLoginScreen(message) {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('login-error').textContent = message || '';
+      document.getElementById('login-password').value = '';
+      setTimeout(() => document.getElementById('login-username').focus(), 0);
+    }
+
+    function onSessionExpired(message) {
+      if (!currentUser) return;
+      currentUser = null;
+      closePasswordModal();
+      showLoginScreen(message);
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-submit');
+      const errorBox = document.getElementById('login-error');
+      errorBox.textContent = '';
+      btn.disabled = true;
+      try {
+        const { user } = await api('/auth/login', {
+          method: 'POST',
+          body: {
+            username: document.getElementById('login-username').value.trim(),
+            password: document.getElementById('login-password').value
           }
-        ];
-        orders = sampleOrders;
-        localStorage.setItem('orders', JSON.stringify(orders));
+        });
+        document.getElementById('login-password').value = '';
+        document.getElementById('login-screen').style.display = 'none';
+        await onLoggedIn(user);
+      } catch (err) {
+        errorBox.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function logout() {
+      try { await api('/auth/logout', { method: 'POST' }); } catch (e) { /* نخرج محلياً على أي حال */ }
+      currentUser = null;
+      products = [];
+      orders = [];
+      cart = [];
+      try { localStorage.removeItem('cart'); } catch (e) {}
+      renderAll();
+      showLoginScreen();
+    }
+
+    async function onLoggedIn(user) {
+      currentUser = user;
+      document.getElementById('current-user-name').textContent = user.displayName;
+      document.getElementById('current-user-role').textContent = user.roleLabel;
+      applyPermissions();
+      if (user.mustChangePassword) {
+        openPasswordModal(true);
+        return;
+      }
+      await refreshAndRender();
+      await offerLegacyMigration();
+      checkLowStockAlerts();
+    }
+
+    /** يُخفي عناصر الواجهة التي لا يملك المستخدم صلاحيتها (العنصر يحمل data-perm). */
+    function applyPermissions() {
+      document.querySelectorAll('[data-perm]').forEach(el => {
+        el.style.display = checkPermission(el.dataset.perm) ? '' : 'none';
+      });
+      const active = document.querySelector('.page.active');
+      const activeLink = active && document.querySelector(`.sidebar-link[data-page="${active.id}"]`);
+      if (activeLink && activeLink.style.display === 'none') {
+        document.querySelector('.sidebar-link[data-page="home"]').click();
+      }
+    }
+
+    // ===== تغيير كلمة المرور =====
+    function openPasswordModal(forced) {
+      const modal = document.getElementById('password-modal');
+      modal.dataset.forced = forced ? '1' : '';
+      document.getElementById('password-modal-note').style.display = forced ? 'block' : 'none';
+      document.getElementById('cancel-password-change').style.display = forced ? 'none' : '';
+      document.getElementById('password-form').reset();
+      document.getElementById('password-error').textContent = '';
+      modal.style.display = 'flex';
+      setTimeout(() => document.getElementById('current-password').focus(), 0);
+    }
+
+    function closePasswordModal() {
+      document.getElementById('password-modal').style.display = 'none';
+    }
+
+    async function handlePasswordChange(e) {
+      e.preventDefault();
+      const errorBox = document.getElementById('password-error');
+      const newPassword = document.getElementById('new-password').value;
+      if (newPassword !== document.getElementById('confirm-password').value) {
+        errorBox.textContent = 'كلمتا المرور غير متطابقتين';
+        return;
+      }
+      const forced = document.getElementById('password-modal').dataset.forced === '1';
+      try {
+        const { user } = await api('/auth/change-password', {
+          method: 'POST',
+          body: { currentPassword: document.getElementById('current-password').value, newPassword }
+        });
+        closePasswordModal();
+        showNotification('تم تغيير كلمة المرور بنجاح', 'success');
+        if (forced) await onLoggedIn(user);
+        else currentUser = user;
+      } catch (err) {
+        const detail = err.details && err.details[0] ? err.details[0].message : '';
+        errorBox.textContent = detail || err.message;
+      }
+    }
+
+    /**
+     * نقل بيانات النسخة السابقة: كانت الأدوية والطلبات محفوظة في المتصفح (localStorage).
+     * إذا وُجدت والخادم فارغ، نعرض على المدير نقلها إلى الخادم.
+     */
+    async function offerLegacyMigration() {
+      if (!checkPermission(PERM.BACKUP) || products.length > 0 || orders.length > 0) return;
+      const legacyProducts = readStoredArray('products');
+      const legacyOrders = readStoredArray('orders');
+      if (legacyProducts.length === 0 && legacyOrders.length === 0) return;
+      const ok = confirm(
+        `وُجدت بيانات من النسخة السابقة محفوظة في هذا المتصفح ` +
+        `(${legacyProducts.length} دواء و${legacyOrders.length} طلب).\n\nهل تريد نقلها إلى الخادم الآن؟`
+      );
+      if (!ok) return;
+      try {
+        const result = await api('/restore', { method: 'POST', body: { products: legacyProducts, orders: legacyOrders } });
+        // نحتفظ بنسخة باسم مختلف للاحتياط بدل حذفها نهائياً
+        try {
+          localStorage.setItem('legacy-backup', JSON.stringify({ products: legacyProducts, orders: legacyOrders, migratedAt: new Date().toISOString() }));
+          localStorage.removeItem('products');
+          localStorage.removeItem('orders');
+        } catch (e) {}
+        await refreshAndRender();
+        showNotification(`تم نقل ${result.products} دواء و${result.orders} طلب إلى الخادم`, 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر نقل البيانات');
+      }
+    }
+
+    // safe localStorage setter (falls back to sessionStorage)
+    function safeSave(key, valueObj) {
+      try {
+        localStorage.setItem(key, JSON.stringify(valueObj));
+        return true;
+      } catch (e) {
+        console.warn('localStorage setItem failed', e);
+        try {
+          sessionStorage.setItem(key, JSON.stringify(valueObj));
+          return true;
+        } catch (e2) {
+          console.error('sessionStorage setItem failed', e2);
+          showNotification('لا يمكن حفظ البيانات محلياً (سعة التخزين ممتلئة)', 'error');
+          return false;
+        }
+      }
+    }
+
+    // تهيئة التطبيق
+    document.addEventListener('DOMContentLoaded', async function() {
+      cart = onlyObjects(readStoredArray('cart')).map(normalizeItem);
+      setupEventListeners();
+
+      // تعيين التاريخ الافتراضي لبداية الشهر
+      const startDate = new Date();
+      startDate.setDate(1);
+      document.getElementById('report-start-date').value = toLocalISODate(startDate);
+      document.getElementById('report-end-date').value = todayISO();
+
+      try {
+        const { user } = await api('/auth/me');
+        await onLoggedIn(user);
+      } catch (err) {
+        showLoginScreen(err.status === 401 || err.status === 0 ? (err.status === 0 ? err.message : '') : err.message);
+      }
+    });
+
+    // ===== إدارة المستخدمين (للمدير) =====
+    const ROLE_OPTIONS = { cashier: 'مندوب / كاشير', manager: 'مشرف', admin: 'مدير النظام' };
+    let usersCache = [];
+
+    async function loadUsers() {
+      if (!checkPermission(PERM.USERS)) return;
+      const table = document.getElementById('users-table');
+      try {
+        usersCache = await api('/users');
+      } catch (err) {
+        showApiError(err, 'تعذّر تحميل المستخدمين');
+        return;
+      }
+      table.innerHTML = usersCache.map(u => {
+        const isMe = currentUser && u.id === currentUser.id;
+        const roleSelect = `<select class="form-control user-role" data-id="${escapeHtml(u.id)}" ${isMe ? 'disabled' : ''} style="min-width:140px">
+            ${Object.entries(ROLE_OPTIONS).map(([value, label]) =>
+              `<option value="${value}" ${u.role === value ? 'selected' : ''}>${label}</option>`).join('')}
+          </select>`;
+        const status = !u.active ? '<span class="status-badge status-returned">معطّل</span>'
+          : u.mustChangePassword ? '<span class="status-badge status-pending">بانتظار تغيير كلمة المرور</span>'
+          : '<span class="status-badge status-completed">نشط</span>';
+        return `<tr class="${u.active ? '' : 'user-inactive'}">
+          <td dir="ltr" style="text-align:right">${escapeHtml(u.username)}${isMe ? ' (أنت)' : ''}</td>
+          <td>${escapeHtml(u.displayName)}</td>
+          <td>${roleSelect}</td>
+          <td>${status}</td>
+          <td>
+            <button class="btn btn-warning reset-user-password" data-id="${escapeHtml(u.id)}">كلمة مرور جديدة</button>
+            ${isMe ? '' : `<button class="btn ${u.active ? 'btn-danger' : 'btn-success'} toggle-user" data-id="${escapeHtml(u.id)}">${u.active ? 'تعطيل' : 'تفعيل'}</button>`}
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    async function updateUser(id, changes, successMessage) {
+      try {
+        await api(`/users/${id}`, { method: 'PATCH', body: changes });
+        showNotification(successMessage, 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر تحديث المستخدم');
+      }
+      await loadUsers();
+    }
+
+    async function addUser(e) {
+      e.preventDefault();
+      const form = e.target;
+      try {
+        await api('/users', {
+          method: 'POST',
+          body: {
+            username: document.getElementById('new-user-username').value.trim(),
+            displayName: document.getElementById('new-user-display').value.trim(),
+            role: document.getElementById('new-user-role').value,
+            password: document.getElementById('new-user-password').value
+          }
+        });
+        form.reset();
+        showNotification('تمت إضافة المستخدم. أعطه اسم المستخدم وكلمة المرور المؤقتة.', 'success');
+        await loadUsers();
+      } catch (err) {
+        showApiError(err, 'تعذّر إضافة المستخدم');
+      }
+    }
+
+    function handleUsersTableClick(e) {
+      const btn = e.target.closest('button[data-id]');
+      if (!btn) return;
+      const id = parseInt(btn.dataset.id, 10);
+      const user = usersCache.find(u => u.id === id);
+      if (!user) return;
+      if (btn.classList.contains('toggle-user')) {
+        const msg = user.active ? `تعطيل المستخدم ${user.displayName}؟ سيتم إخراجه من النظام فوراً.` : `تفعيل المستخدم ${user.displayName}؟`;
+        if (confirm(msg)) updateUser(id, { active: !user.active }, user.active ? 'تم تعطيل المستخدم' : 'تم تفعيل المستخدم');
+      } else if (btn.classList.contains('reset-user-password')) {
+        const password = prompt(`كلمة مرور مؤقتة جديدة للمستخدم ${user.displayName} (8 أحرف على الأقل):`);
+        if (password === null) return;
+        if (password.length < 8) {
+          showNotification('كلمة المرور يجب أن تكون 8 أحرف على الأقل', 'error');
+          return;
+        }
+        updateUser(id, { password }, 'تم تعيين كلمة المرور المؤقتة؛ سيُطلب من المستخدم تغييرها عند الدخول');
+      }
+    }
+
+    function handleUsersTableChange(e) {
+      const select = e.target.closest('select.user-role');
+      if (!select) return;
+      const id = parseInt(select.dataset.id, 10);
+      const user = usersCache.find(u => u.id === id);
+      if (!user) return;
+      if (confirm(`تغيير دور ${user.displayName} إلى "${ROLE_OPTIONS[select.value]}"؟`)) {
+        updateUser(id, { role: select.value }, 'تم تغيير الدور');
+      } else {
+        select.value = user.role;
       }
     }
 
     function setupEventListeners() {
+      // الدخول والجلسة
+      document.getElementById('login-form').addEventListener('submit', handleLogin);
+      document.getElementById('logout-btn').addEventListener('click', logout);
+      document.getElementById('change-password-btn').addEventListener('click', () => openPasswordModal(false));
+      document.getElementById('password-form').addEventListener('submit', handlePasswordChange);
+      document.getElementById('cancel-password-change').addEventListener('click', closePasswordModal);
+
+      // المستخدمون
+      document.getElementById('add-user-form').addEventListener('submit', addUser);
+      document.getElementById('users-table').addEventListener('click', handleUsersTableClick);
+      document.getElementById('users-table').addEventListener('change', handleUsersTableChange);
+
       // القائمة الجانبية
       document.querySelectorAll('.sidebar-link').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -1281,10 +1698,15 @@
       document.getElementById(pageId).classList.add('active');
       
       switch(pageId) {
-        case 'products': loadProducts(); break;
-        case 'manage-medicines': loadManageMedicines(); break;
-        case 'orders': loadOrders(); break;
-        case 'inventory': updateStats(); break;
+        // نجلب أحدث البيانات من الخادم عند فتح الصفحة (قد يكون مستخدم آخر غيّرها)
+        case 'home':
+        case 'products':
+        case 'manage-medicines':
+        case 'orders':
+        case 'inventory':
+          if (currentUser) refreshAndRender();
+          break;
+        case 'users': loadUsers(); break;
         case 'reports': 
           // لا نقوم بتحميل التقرير تلقائياً، ينتظر المستخدم
           break;
@@ -1299,10 +1721,6 @@
       document.getElementById(`${tabId}-orders-tab`).classList.add('active');
     }
 
-    // التحقق من الصلاحيات
-    function checkPermission(action) {
-      return userRoles[currentUser.role].includes(action);
-    }
 
     // التحقق من صحة البيانات المدخلة
     function validateProductData(product) {
@@ -1387,60 +1805,73 @@
       });
     }
 
-    function addNewProduct() {
+    // يحوّل dataURL (ناتج ضغط الصورة) إلى Blob لرفعه للخادم
+    function dataUrlToBlob(dataUrl) {
+      const [header, base64] = dataUrl.split(',');
+      const mime = (header.match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
+      const bin = atob(base64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new Blob([bytes], { type: mime });
+    }
+
+    // يبني بيانات الدواء للإرسال، مع ضغط الصورة قبل الرفع (أقصى 1200px)
+    async function buildProductForm(name, type, price, stock, imageFile) {
+      const form = new FormData();
+      form.append('name', name);
+      form.append('type', type);
+      form.append('price', String(price));
+      form.append('stock', String(stock));
+      if (imageFile) {
+        let blob = imageFile;
+        try {
+          const dataUrl = await compressImage(imageFile, 1200, 1200, 0.75);
+          if (dataUrl) blob = dataUrlToBlob(dataUrl);
+        } catch (e) {
+          console.warn('تعذّر ضغط الصورة، سيتم رفع الأصل', e);
+        }
+        form.append('image', blob, 'image.jpg');
+      }
+      return form;
+    }
+
+    async function addNewProduct() {
       const name = document.getElementById('product-name').value.trim();
       const type = document.getElementById('product-type').value;
       const price = parseFloat(document.getElementById('product-price').value) || 0;
       const stock = parseInt(document.getElementById('product-stock').value) || 0;
       const imageInput = document.getElementById('product-image');
 
-      // التحقق من الصلاحيات
-      if (!checkPermission('add')) {
+      if (!checkPermission(PERM.PRODUCTS_WRITE)) {
         showNotification('ليس لديك صلاحية لإضافة منتجات', 'error');
         return;
       }
 
-      // التحقق من صحة البيانات
+      // تحقق سريع في المتصفح (الخادم يتحقق مرة أخرى)
       const validationErrors = validateProductData({ name, price, stock });
       if (validationErrors.length > 0) {
         validationErrors.forEach(error => showNotification(error, 'error'));
         return;
       }
-
       if (!name || !type || price <= 0 || stock < 0) {
         showNotification('يرجى ملء جميع الحقول بشكل صحيح', 'error');
         return;
       }
 
-      let imageUrl = '';
-
-      if (imageInput && imageInput.files && imageInput.files[0]) {
-        // compress before saving (max 1200x1200, quality 0.75)
-        compressImage(imageInput.files[0], 1200, 1200, 0.75)
-          .then(dataUrl => saveProduct(name, type, price, stock, dataUrl || imageUrl))
-          .catch(() => {
-            // fallback to reading original if compression fails
-            const reader = new FileReader();
-            reader.onload = e => saveProduct(name, type, price, stock, e.target.result);
-            reader.readAsDataURL(imageInput.files[0]);
-          });
-      } else {
-        saveProduct(name, type, price, stock, imageUrl);
+      const submitBtn = document.querySelector('#add-product-form button[type="submit"]');
+      submitBtn.disabled = true;
+      try {
+        const file = imageInput && imageInput.files && imageInput.files[0];
+        const form = await buildProductForm(name, type, price, stock, file);
+        await api('/products', { method: 'POST', body: form });
+        document.getElementById('add-product-form').reset();
+        await refreshAndRender();
+        showNotification('تم إضافة الدواء بنجاح', 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر إضافة الدواء');
+      } finally {
+        submitBtn.disabled = false;
       }
-    }
-
-    function saveProduct(name, type, price, stock, image) {
-      const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-      const newProduct = { id: newId, name, type, price, stock, image };
-      
-      products.push(newProduct);
-      localStorage.setItem('products', JSON.stringify(products));
-      
-      document.getElementById('add-product-form').reset();
-      loadProducts();
-      loadManageMedicines();
-      updateStats();
-      showNotification('تم إضافة الدواء بنجاح', 'success');
     }
 
     // إدارة السلة
@@ -1546,7 +1977,7 @@
           
           if (item && product && item.quantity < product.stock) {
             item.quantity++;
-            localStorage.setItem('cart', JSON.stringify(cart));
+            safeSave('cart', cart);
             updateCart();
           } else {
             showNotification('لا توجد كمية كافية في المخزون', 'error');
@@ -1561,7 +1992,7 @@
           
           if (item && item.quantity > 1) {
             item.quantity--;
-            localStorage.setItem('cart', JSON.stringify(cart));
+            safeSave('cart', cart);
             updateCart();
           }
         });
@@ -1577,7 +2008,7 @@
           if (item && product) {
             if (newQuantity <= product.stock) {
               item.quantity = newQuantity;
-              localStorage.setItem('cart', JSON.stringify(cart));
+              safeSave('cart', cart);
               updateCart();
             } else {
               showNotification('تجاوزت الكمية المتاحة في المخزون', 'error');
@@ -1590,53 +2021,59 @@
 
     function removeFromCart(productId) {
       cart = cart.filter(item => item.id !== productId);
-      localStorage.setItem('cart', JSON.stringify(cart));
+      safeSave('cart', cart);
       updateCart();
       showNotification('تم حذف المنتج من السلة', 'success');
     }
 
     // إدارة الطلبات
-    function createInvoice() {
+    async function createInvoice() {
       const pharmacy = document.getElementById('pharmacy-name').value.trim();
       const notes = document.getElementById('order-notes').value.trim();
-      
+
+      if (!checkPermission(PERM.ORDERS_CREATE)) {
+        showNotification('ليس لديك صلاحية لإنشاء الطلبات', 'error');
+        return;
+      }
       if (!pharmacy) {
         showNotification('يرجى إدخال اسم الصيدلية', 'error');
         return;
       }
-      
       if (cart.length === 0) {
         showNotification('السلة فارغة', 'error');
         return;
       }
-      
-      const newOrder = {
-        id: orders.length > 0 ? Math.max(...orders.map(o => o.id)) + 1 : 1,
-        pharmacy: pharmacy,
-        notes: notes,
-        items: [...cart],
-        date: todayISO(),
-        status: 'معلق'
-      };
-      
-      orders.push(newOrder);
-      localStorage.setItem('orders', JSON.stringify(orders));
-      
-      cart = [];
-      localStorage.setItem('cart', JSON.stringify(cart));
-      updateCart();
-      
-      document.getElementById('pharmacy-name').value = '';
-      document.getElementById('order-notes').value = '';
-      document.getElementById('whatsapp-number').value = '';
-      
-      showNotification('تم إنشاء الفاتورة بنجاح', 'success');
-      printInvoice(newOrder);
-      loadOrders();
-      updateStats();
+
+      // نفتح نافذة الفاتورة الآن (أثناء ضغطة الزر) حتى لا يحجبها المتصفح بعد انتظار رد الخادم
+      const invoiceWindow = window.open('', '_blank', 'width=800,height=600');
+      const btn = document.getElementById('create-invoice');
+      btn.disabled = true;
+      try {
+        // نرسل المعرّف والكمية فقط؛ الخادم يأخذ الأسعار من قاعدة البيانات ويحسب الإجمالي
+        const order = await api('/orders', {
+          method: 'POST',
+          body: { pharmacy, notes, items: cart.map(item => ({ productId: item.id, quantity: item.quantity })) }
+        });
+
+        cart = [];
+        safeSave('cart', cart);
+        document.getElementById('pharmacy-name').value = '';
+        document.getElementById('order-notes').value = '';
+        document.getElementById('whatsapp-number').value = '';
+
+        showNotification('تم إنشاء الفاتورة بنجاح', 'success');
+        printInvoice(order, invoiceWindow);
+        await refreshAndRender();
+      } catch (err) {
+        if (invoiceWindow) invoiceWindow.close();
+        showApiError(err, 'تعذّر إنشاء الفاتورة');
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     function loadOrders() {
+      canManage = checkPermission(PERM.ORDERS_MANAGE);
       loadPendingOrders();
       loadCompletedOrders();
       loadReturnedOrders();
@@ -1644,7 +2081,7 @@
 
     function loadPendingOrders() {
       const table = document.getElementById('pending-orders-table');
-      const pendingOrders = orders.filter(order => order.status === 'معلق');
+      const pendingOrders = orders.filter(order => order.status === STATUS.PENDING);
       
       table.innerHTML = '';
       
@@ -1663,9 +2100,9 @@
           <td>${total.toFixed(2)} د.ع</td>
           <td><span class="status-badge status-pending">معلق</span></td>
           <td>
-            <button class="btn btn-success complete-order" data-id="${escapeHtml(order.id)}">تم التجهيز</button>
+            ${canManage ? `<button class="btn btn-success complete-order" data-id="${escapeHtml(order.id)}">تم التجهيز</button>` : ''}
             <button class="btn btn-primary view-order" data-id="${escapeHtml(order.id)}">عرض</button>
-            <button class="btn btn-danger delete-order" data-id="${escapeHtml(order.id)}">حذف</button>
+            ${canManage ? `<button class="btn btn-danger delete-order" data-id="${escapeHtml(order.id)}">حذف</button>` : ''}
           </td>
         `;
         table.appendChild(row);
@@ -1674,7 +2111,7 @@
 
     function loadCompletedOrders() {
       const table = document.getElementById('completed-orders-table');
-      const completedOrders = orders.filter(order => order.status === 'مكتمل');
+      const completedOrders = orders.filter(order => order.status === STATUS.COMPLETED);
       
       table.innerHTML = '';
       
@@ -1693,7 +2130,7 @@
           <td>${total.toFixed(2)} د.ع</td>
           <td><span class="status-badge status-completed">مكتمل</span></td>
           <td>
-            <button class="btn btn-warning return-order" data-id="${escapeHtml(order.id)}">استرجاع</button>
+            ${canManage ? `<button class="btn btn-warning return-order" data-id="${escapeHtml(order.id)}">استرجاع</button>` : ''}
             <button class="btn btn-primary view-order" data-id="${escapeHtml(order.id)}">عرض</button>
           </td>
         `;
@@ -1703,7 +2140,7 @@
 
     function loadReturnedOrders() {
       const table = document.getElementById('returned-orders-table');
-      const returnedOrders = orders.filter(order => order.status === 'مسترجعة');
+      const returnedOrders = orders.filter(order => order.status === STATUS.RETURNED);
       
       table.innerHTML = '';
       
@@ -1723,86 +2160,48 @@
           <td><span class="status-badge status-returned">مسترجعة</span></td>
           <td>
             <button class="btn btn-primary view-order" data-id="${escapeHtml(order.id)}">عرض</button>
-            <button class="btn btn-danger delete-order" data-id="${escapeHtml(order.id)}">حذف</button>
+            ${canManage ? `<button class="btn btn-danger delete-order" data-id="${escapeHtml(order.id)}">حذف</button>` : ''}
           </td>
         `;
         table.appendChild(row);
       });
     }
 
+    // تنفيذ إجراء على طلب عبر الخادم ثم تحديث كل الشاشات
+    async function runOrderAction(request, successMessage, fallbackError) {
+      if (!checkPermission(PERM.ORDERS_MANAGE)) {
+        showNotification('ليس لديك صلاحية لإدارة الطلبات', 'error');
+        return;
+      }
+      try {
+        await request();
+        showNotification(successMessage, 'success');
+      } catch (err) {
+        showApiError(err, fallbackError);
+      }
+      // نحدّث في الحالتين: قد يكون مستخدم آخر غيّر الطلب أو المخزون
+      await refreshAndRender();
+    }
+
     function completeOrder(orderId) {
       if (!confirm('هل أنت متأكد من أن الطلبية قد تم تجهيزها؟ سيتم خصم المواد من المخزون.')) return;
-      
-      const orderIndex = orders.findIndex(order => order.id === orderId);
-      if (orderIndex === -1) return;
-      
-      const order = orders[orderIndex];
-      
-      // التحقق من توفر المخزون
-      for (const item of order.items) {
-        const product = products.find(p => p.id === item.id);
-        if (!product || product.stock < item.quantity) {
-          showNotification(`الكمية غير كافية من ${item.name}`, 'error');
-          return;
-        }
-      }
-      
-      // خصم المواد من المخزون
-      order.items.forEach(item => {
-        const product = products.find(p => p.id === item.id);
-        if (product) {
-          product.stock -= item.quantity;
-        }
-      });
-      
-      // تحديث حالة الطلب
-      orders[orderIndex].status = 'مكتمل';
-      orders[orderIndex].completedDate = todayISO();
-      
-      localStorage.setItem('products', JSON.stringify(products));
-      localStorage.setItem('orders', JSON.stringify(orders));
-      
-      loadOrders();
-      updateStats();
-      showNotification('تم تحديث حالة الطلبية إلى مكتملة', 'success');
+      return runOrderAction(
+        () => api(`/orders/${orderId}/complete`, { method: 'POST' }),
+        'تم تحديث حالة الطلبية إلى مكتملة', 'تعذّر تجهيز الطلبية');
     }
 
     function returnOrder(orderId) {
       if (!confirm('هل أنت متأكد من استرجاع هذه الطلبية؟ سيتم إعادة المواد إلى المخزون.')) return;
-      
-      const orderIndex = orders.findIndex(order => order.id === orderId);
-      if (orderIndex === -1) return;
-      
-      const order = orders[orderIndex];
-      
-      // إعادة المواد إلى المخزون
-      order.items.forEach(item => {
-        const product = products.find(p => p.id === item.id);
-        if (product) {
-          product.stock += item.quantity;
-        }
-      });
-      
-      // تحديث حالة الطلب
-      orders[orderIndex].status = 'مسترجعة';
-      orders[orderIndex].returnedDate = todayISO();
-      
-      localStorage.setItem('products', JSON.stringify(products));
-      localStorage.setItem('orders', JSON.stringify(orders));
-      
-      loadOrders();
-      updateStats();
-      showNotification('تم استرجاع الطلبية وإعادة المواد إلى المخزون', 'success');
+      return runOrderAction(
+        () => api(`/orders/${orderId}/return`, { method: 'POST' }),
+        'تم استرجاع الطلبية وإعادة المواد إلى المخزون', 'تعذّر استرجاع الطلبية');
     }
 
     function deleteOrder(orderId) {
       if (!confirm('هل أنت متأكد من حذف هذه الطلبية؟')) return;
-      
-      orders = orders.filter(order => order.id !== orderId);
-      localStorage.setItem('orders', JSON.stringify(orders));
-      loadOrders();
-      updateStats();
-      showNotification('تم حذف الطلبية', 'success');
+      return runOrderAction(
+        () => api(`/orders/${orderId}`, { method: 'DELETE' }),
+        'تم حذف الطلبية', 'تعذّر حذف الطلبية');
     }
 
     function viewOrder(orderId) {
@@ -1824,8 +2223,8 @@
           <td>${escapeHtml(product.price)} د.ع</td>
           <td>${escapeHtml(product.stock)}</td>
           <td>
-            <button class="btn btn-primary edit-medicine" data-id="${escapeHtml(product.id)}">تعديل</button>
-            <button class="btn btn-danger delete-medicine" data-id="${escapeHtml(product.id)}">حذف</button>
+            ${checkPermission(PERM.PRODUCTS_WRITE) ? `<button class="btn btn-primary edit-medicine" data-id="${escapeHtml(product.id)}">تعديل</button>` : ''}
+            ${checkPermission(PERM.PRODUCTS_DELETE) ? `<button class="btn btn-danger delete-medicine" data-id="${escapeHtml(product.id)}">حذف</button>` : ''}
           </td>
         `;
         table.appendChild(row);
@@ -1861,91 +2260,71 @@
       currentEditingMedicineId = null;
     }
 
-    function saveMedicineEdit() {
+    async function saveMedicineEdit() {
       if (!currentEditingMedicineId) return;
-      
+
       const name = document.getElementById('edit-medicine-name').value.trim();
       const type = document.getElementById('edit-medicine-type').value.trim();
       const price = parseFloat(document.getElementById('edit-medicine-price').value) || 0;
       const stock = parseInt(document.getElementById('edit-medicine-stock').value) || 0;
       const imageInput = document.getElementById('edit-medicine-image');
 
-      // التحقق من الصلاحيات
-      if (!checkPermission('edit')) {
+      if (!checkPermission(PERM.PRODUCTS_WRITE)) {
         showNotification('ليس لديك صلاحية لتعديل المنتجات', 'error');
         return;
       }
 
-      // التحقق من صحة البيانات
       const validationErrors = validateProductData({ name, price, stock });
       if (validationErrors.length > 0) {
         validationErrors.forEach(error => showNotification(error, 'error'));
         return;
       }
-
       if (!name || !type || price <= 0 || stock < 0) {
         showNotification('يرجى ملء جميع الحقول بشكل صحيح', 'error');
         return;
       }
-      
-      const productIndex = products.findIndex(p => p.id === currentEditingMedicineId);
-      if (productIndex === -1) return;
 
-      if (imageInput && imageInput.files && imageInput.files[0]) {
-        compressImage(imageInput.files[0], 1200, 1200, 0.75)
-          .then(dataUrl => updateProduct(productIndex, name, type, price, stock, dataUrl || products[productIndex].image))
-          .catch(() => {
-            const reader = new FileReader();
-            reader.onload = e => updateProduct(productIndex, name, type, price, stock, e.target.result);
-            reader.readAsDataURL(imageInput.files[0]);
-          });
-      } else {
-        updateProduct(productIndex, name, type, price, stock, products[productIndex].image);
+      const btn = document.getElementById('save-medicine-changes');
+      btn.disabled = true;
+      try {
+        const file = imageInput && imageInput.files && imageInput.files[0];
+        const form = await buildProductForm(name, type, price, stock, file);
+        await api(`/products/${currentEditingMedicineId}`, { method: 'PUT', body: form });
+        closeEditModal();
+        await refreshAndRender();
+        showNotification('تم تحديث الدواء بنجاح', 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر تحديث الدواء');
+      } finally {
+        btn.disabled = false;
       }
     }
 
-    function updateProduct(index, name, type, price, stock, image) {
-      products[index] = {
-        ...products[index],
-        name: name,
-        type: type,
-        price: price,
-        stock: stock,
-        image: image
-      };
-      
-      localStorage.setItem('products', JSON.stringify(products));
-      loadProducts();
-      loadManageMedicines();
-      closeEditModal();
-      updateStats();
-      showNotification('تم تحديث الدواء بنجاح', 'success');
-    }
-
-    function deleteMedicine(productId) {
-      if (!checkPermission('delete')) {
+    async function deleteMedicine(productId) {
+      if (!checkPermission(PERM.PRODUCTS_DELETE)) {
         showNotification('ليس لديك صلاحية لحذف المنتجات', 'error');
         return;
       }
-      
-      if (!confirm('هل أنت متأكد من حذف هذا الدواء؟')) return;
-      
-      products = products.filter(p => p.id !== productId);
-      localStorage.setItem('products', JSON.stringify(products));
-      loadProducts();
-      loadManageMedicines();
-      updateStats();
-      showNotification('تم حذف الدواء بنجاح', 'success');
+      if (!confirm('هل أنت متأكد من حذف هذا الدواء؟ (الطلبات القديمة تحتفظ باسمه وسعره)')) return;
+      try {
+        await api(`/products/${productId}`, { method: 'DELETE' });
+        cart = cart.filter(item => item.id !== productId);
+        safeSave('cart', cart);
+        showNotification('تم حذف الدواء بنجاح', 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر حذف الدواء');
+      }
+      await refreshAndRender();
     }
 
     // الإحصائيات والتقارير
     function updateStats() {
       document.getElementById('total-products').textContent = products.length;
-      document.getElementById('pending-orders').textContent = orders.filter(o => o.status === 'معلق').length;
+      document.getElementById('pending-orders').textContent = orders.filter(o => o.status === STATUS.PENDING).length;
       document.getElementById('low-stock').textContent = products.filter(isLowStock).length;
       
       const totalSales = orders
-        .filter(order => order.status === 'مكتمل')
+        .filter(order => order.status === STATUS.COMPLETED)
         .reduce((sum, order) => {
           return sum + order.items.reduce((orderSum, item) => orderSum + (item.price * item.quantity), 0);
         }, 0);
@@ -1997,13 +2376,13 @@
         let statusBadge = '';
         
         switch(order.status) {
-          case 'معلق':
+          case STATUS.PENDING:
             statusBadge = '<span class="status-badge status-pending">معلق</span>';
             break;
-          case 'مكتمل':
+          case STATUS.COMPLETED:
             statusBadge = '<span class="status-badge status-completed">مكتمل</span>';
             break;
-          case 'مسترجعة':
+          case STATUS.RETURNED:
             statusBadge = '<span class="status-badge status-returned">مسترجعة</span>';
             break;
         }
@@ -2022,7 +2401,7 @@
 
     // نظام التقارير المحسن
     function generateReport() {
-      if (!checkPermission('reports')) {
+      if (!checkPermission(PERM.REPORTS)) {
         showNotification('ليس لديك صلاحية لعرض التقارير', 'error');
         return;
       }
@@ -2127,7 +2506,7 @@
                 <td>${escapeHtml(order.date)}</td>
                 <td>${escapeHtml(order.itemsCount)}</td>
                 <td>${order.total.toFixed(2)} د.ع</td>
-                <td><span class="status-badge ${getStatusClass(order.status)}">${escapeHtml(order.status)}</span></td>
+                <td><span class="status-badge ${getStatusClass(order.status)}">${escapeHtml(statusLabel(order.status))}</span></td>
               </tr>
             `;
           });
@@ -2255,10 +2634,10 @@
       return {
         totalProducts: products.length,
         lowStockProducts: products.filter(isLowStock).length,
-        completedOrders: filteredOrders.filter(o => o.status === 'مكتمل').length,
-        pendingOrders: filteredOrders.filter(o => o.status === 'معلق').length,
+        completedOrders: filteredOrders.filter(o => o.status === STATUS.COMPLETED).length,
+        pendingOrders: filteredOrders.filter(o => o.status === STATUS.PENDING).length,
         totalSales: filteredOrders
-          .filter(o => o.status === 'مكتمل')
+          .filter(o => o.status === STATUS.COMPLETED)
           .reduce((sum, order) => sum + order.items.reduce((orderSum, item) => 
             orderSum + (item.price * item.quantity), 0), 0)
       };
@@ -2287,7 +2666,7 @@
       const productSales = {};
       
       orders
-        .filter(order => order.status === 'مكتمل' && order.date >= startDate && order.date <= endDate)
+        .filter(order => order.status === STATUS.COMPLETED && order.date >= startDate && order.date <= endDate)
         .forEach(order => {
           order.items.forEach(item => {
             if (!productSales[item.id]) {
@@ -2310,9 +2689,9 @@
 
     function getStatusClass(status) {
       switch(status) {
-        case 'مكتمل': return 'status-completed';
-        case 'معلق': return 'status-pending';
-        case 'مسترجعة': return 'status-returned';
+        case STATUS.COMPLETED: return 'status-completed';
+        case STATUS.PENDING: return 'status-pending';
+        case STATUS.RETURNED: return 'status-returned';
         default: return 'status-pending';
       }
     }
@@ -2494,14 +2873,14 @@
       if (opts.sales) {
         const rows = [['رقم الطلب', 'الصيدلية', 'التاريخ', 'عدد القطع', 'المبلغ (د.ع)', 'الحالة']];
         getSalesData(startDate, endDate).forEach(o =>
-          rows.push([o.id, o.pharmacy, o.date, o.itemsCount, o.total, o.status]));
+          rows.push([o.id, o.pharmacy, o.date, o.itemsCount, o.total, statusLabel(o.status)]));
         sheets.push({ name: 'المبيعات', rows });
       }
 
       if (opts.returns) {
         const rows = [['رقم الطلب', 'الصيدلية', 'تاريخ الطلب', 'تاريخ الاسترجاع', 'المبلغ (د.ع)']];
         orders
-          .filter(o => o.status === 'مسترجعة' && o.date >= startDate && o.date <= endDate)
+          .filter(o => o.status === STATUS.RETURNED && o.date >= startDate && o.date <= endDate)
           .forEach(o => rows.push([
             o.id, o.pharmacy, o.date, o.returnedDate || '',
             o.items.reduce((sum, i) => sum + i.price * i.quantity, 0)
@@ -2558,7 +2937,7 @@
     }
 
     async function exportReportToExcel() {
-      if (!checkPermission('reports')) {
+      if (!checkPermission(PERM.REPORTS)) {
         showNotification('ليس لديك صلاحية لتصدير التقارير', 'error');
         return;
       }
@@ -2602,8 +2981,12 @@
     }
 
     // دوال مساعدة
-    function printInvoice(order) {
-      const printWindow = window.open('', '_blank', 'width=800,height=600');
+    function printInvoice(order, existingWindow) {
+      const printWindow = existingWindow || window.open('', '_blank', 'width=800,height=600');
+      if (!printWindow) {
+        showNotification('المتصفح منع فتح نافذة الفاتورة، اسمح بالنوافذ المنبثقة لهذا الموقع', 'warning');
+        return;
+      }
       const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const tax = subtotal * TAX_RATE;
       const total = subtotal + tax;
@@ -2637,6 +3020,7 @@
             <div class="invoice-details">
               <div>رقم الفاتورة: ${escapeHtml(order.id)}</div>
               <div>التاريخ: ${escapeHtml(order.date)}</div>
+              ${order.createdBy ? `<div>المندوب: ${escapeHtml(order.createdBy)}</div>` : ''}
             </div>
           </div>
           
@@ -2810,58 +3194,49 @@
       });
     }
 
-    // وظائف النسخ الاحتياطي والاستعادة
-    function backupData() {
-      if (!checkPermission('backup')) {
+    // وظائف النسخ الاحتياطي والاستعادة (على الخادم)
+    async function backupData() {
+      if (!checkPermission(PERM.BACKUP)) {
         showNotification('ليس لديك صلاحية للنسخ الاحتياطي', 'error');
         return;
       }
-      
-      const data = {
-        products: products,
-        orders: orders,
-        timestamp: new Date().toISOString()
-      };
-      
-      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `backup-${todayISO()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      showNotification('تم إنشاء نسخة احتياطية بنجاح', 'success');
+      try {
+        const data = await api('/backup');
+        // النسخة تتضمن الصور، وتُستعاد كما هي من زر "استعادة بيانات"
+        downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), `backup-${todayISO()}.json`);
+        showNotification('تم إنشاء نسخة احتياطية بنجاح', 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر إنشاء النسخة الاحتياطية');
+      }
     }
 
     function restoreData(file) {
-      if (!checkPermission('backup')) {
+      if (!checkPermission(PERM.BACKUP)) {
         showNotification('ليس لديك صلاحية لاستعادة البيانات', 'error');
         return;
       }
-      
+
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = async function(e) {
+        let data;
         try {
-          const data = JSON.parse(e.target.result);
-          if (!data || !Array.isArray(data.products) || !Array.isArray(data.orders)) {
-            showNotification('ملف النسخة الاحتياطية غير صالح', 'error');
-            return;
-          }
-          if (confirm('هل أنت متأكد من استعادة البيانات؟ سيتم استبدال جميع البيانات الحالية.')) {
-            products = onlyObjects(data.products).map(normalizeProduct);
-            orders = onlyObjects(data.orders).map(normalizeOrder);
-            localStorage.setItem('products', JSON.stringify(products));
-            localStorage.setItem('orders', JSON.stringify(orders));
-            loadProducts();
-            loadOrders();
-            updateStats();
-            showNotification('تم استعادة البيانات بنجاح', 'success');
-          }
+          data = JSON.parse(e.target.result);
         } catch (error) {
-          showNotification('خطأ في استعادة البيانات', 'error');
+          showNotification('ملف النسخة الاحتياطية غير صالح', 'error');
+          return;
+        }
+        if (!data || !Array.isArray(data.products) || !Array.isArray(data.orders)) {
+          showNotification('ملف النسخة الاحتياطية غير صالح', 'error');
+          return;
+        }
+        if (!confirm('هل أنت متأكد من استعادة البيانات؟ سيتم استبدال جميع الأدوية والطلبات على الخادم (المستخدمون لا يتأثرون).')) return;
+        try {
+          // يقبل الخادم نسخ هذا الإصدار ونسخ الإصدار السابق (المحفوظة من المتصفح)
+          const result = await api('/restore', { method: 'POST', body: { products: data.products, orders: data.orders } });
+          await refreshAndRender();
+          showNotification(`تمت استعادة ${result.products} دواء و${result.orders} طلب`, 'success');
+        } catch (err) {
+          showApiError(err, 'خطأ في استعادة البيانات');
         }
       };
       reader.readAsText(file);
@@ -2946,7 +3321,7 @@
       
       // حساب المبيعات لكل شهر
       orders
-        .filter(order => order.status === 'مكتمل')
+        .filter(order => order.status === STATUS.COMPLETED)
         .forEach(order => {
           const orderDate = new Date(order.date);
           const monthYear = `${orderDate.getMonth() + 1}/${orderDate.getFullYear()}`;
