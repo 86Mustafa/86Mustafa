@@ -1,17 +1,48 @@
 'use strict';
 
 const { z } = require('zod');
+const { normalizeDate } = require('./dates');
 
 const text = (max, label) =>
   z.string({ error: `${label} مطلوب` }).trim().max(max, `${label} يجب ألا يتجاوز ${max} حرفاً`);
+
+const quantity = (label) => z.coerce.number({ error: `${label} غير صالحة` }).int(`${label} يجب أن تكون عدداً صحيحاً`)
+  .min(0, `${label} لا يمكن أن تكون سالبة`).max(10_000_000, `${label} كبيرة جداً`);
+
+// تاريخ انتهاء اختياري بصيغة YYYY-MM-DD (الحقل الفارغ = بلا تاريخ)
+const expiryDate = z.preprocess(
+  (v) => (v === '' || v === undefined ? null : v),
+  z.string().trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'تاريخ الانتهاء يجب أن يكون بصيغة YYYY-MM-DD')
+    .refine((v) => normalizeDate(v) === v, 'تاريخ الانتهاء غير صالح')
+    .nullable()
+);
+const batchNo = z.preprocess((v) => (v == null ? '' : v), text(50, 'رقم الدفعة'));
 
 // الحقول تصل كنصوص عند الإرسال بصيغة multipart (مع الصورة)، لذا نحوّلها لأرقام
 const productSchema = z.object({
   name: text(120, 'اسم الدواء').min(2, 'اسم الدواء يجب أن يكون على الأقل حرفين'),
   type: text(50, 'النوع').min(1, 'النوع مطلوب'),
   price: z.coerce.number({ error: 'السعر غير صالح' }).positive('السعر يجب أن يكون أكبر من صفر').max(1e9, 'السعر كبير جداً'),
-  stock: z.coerce.number({ error: 'الكمية غير صالحة' }).int('الكمية يجب أن تكون عدداً صحيحاً')
-    .min(0, 'الكمية لا يمكن أن تكون سالبة').max(10_000_000, 'الكمية كبيرة جداً'),
+});
+
+// عند الإضافة: الدفعة الأولى اختيارية (كمية + رقم + تاريخ انتهاء)
+const productCreateSchema = productSchema.extend({
+  stock: quantity('الكمية').default(0),
+  batchNo: batchNo.optional().default(''),
+  expiryDate: expiryDate.optional().default(null),
+});
+
+const batchSchema = z.object({
+  batchNo: batchNo.optional().default(''),
+  expiryDate: expiryDate.optional().default(null),
+  quantity: quantity('الكمية'),
+});
+
+const batchUpdateSchema = z.object({
+  batchNo: batchNo.optional(),
+  expiryDate: expiryDate.optional(),
+  quantity: quantity('الكمية').optional(),
 });
 
 const orderSchema = z.object({
@@ -53,6 +84,6 @@ const updateUserSchema = z.object({
 const idParam = z.coerce.number().int().positive();
 
 module.exports = {
-  productSchema, orderSchema, loginSchema, changePasswordSchema,
+  productSchema, productCreateSchema, batchSchema, batchUpdateSchema, orderSchema, loginSchema, changePasswordSchema,
   createUserSchema, updateUserSchema, idParam,
 };

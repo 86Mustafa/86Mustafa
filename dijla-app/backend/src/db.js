@@ -60,6 +60,37 @@ const MIGRATIONS = [
   );
   CREATE INDEX idx_order_items_order ON order_items(order_id);
   `,
+
+  // 2) الدفعات وتواريخ الانتهاء: المخزون صار مجموع كميات الدفعات بدل عمود stock
+  `
+  CREATE TABLE product_batches (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id  INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    batch_no    TEXT    NOT NULL DEFAULT '',          -- رقم الدفعة / التشغيلة (Lot)
+    expiry_date TEXT CHECK (expiry_date IS NULL OR expiry_date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+    quantity    INTEGER NOT NULL DEFAULT 0 CHECK (quantity >= 0),
+    created_at  TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  );
+  CREATE INDEX idx_batches_product ON product_batches(product_id, expiry_date);
+
+  -- المخزون الحالي ينتقل إلى دفعة "غير محددة" (بلا رقم ولا تاريخ انتهاء)
+  INSERT INTO product_batches (product_id, batch_no, expiry_date, quantity)
+    SELECT id, '', NULL, stock FROM products WHERE stock > 0;
+
+  ALTER TABLE products DROP COLUMN stock;
+
+  -- من أي دفعة خرج كل صنف عند التجهيز (لإظهارها في الفاتورة وإعادتها لنفس الدفعة عند الاسترجاع)
+  -- نحفظ رقم الدفعة وتاريخها أيضاً لأن الدفعة قد تُحذف لاحقاً
+  CREATE TABLE order_item_batches (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_item_id INTEGER NOT NULL REFERENCES order_items(id) ON DELETE CASCADE,
+    batch_id      INTEGER REFERENCES product_batches(id) ON DELETE SET NULL,
+    batch_no      TEXT    NOT NULL DEFAULT '',
+    expiry_date   TEXT,
+    quantity      INTEGER NOT NULL CHECK (quantity > 0)
+  );
+  CREATE INDEX idx_oib_item ON order_item_batches(order_item_id);
+  `,
 ];
 
 function openDatabase(dbPath) {
@@ -72,9 +103,9 @@ function openDatabase(dbPath) {
   return db;
 }
 
-function migrate(db) {
+function migrate(db, target = MIGRATIONS.length) {
   const current = db.pragma('user_version', { simple: true });
-  for (let v = current; v < MIGRATIONS.length; v++) {
+  for (let v = current; v < target; v++) {
     db.transaction(() => {
       db.exec(MIGRATIONS[v]);
       db.pragma(`user_version = ${v + 1}`);
@@ -82,4 +113,4 @@ function migrate(db) {
   }
 }
 
-module.exports = { openDatabase };
+module.exports = { openDatabase, migrate, MIGRATIONS };

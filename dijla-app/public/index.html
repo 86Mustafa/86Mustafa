@@ -400,6 +400,22 @@
     .icon.pending { background: linear-gradient(45deg,#f39c12,#e67e22); }
     .icon.low { background: linear-gradient(45deg,#e74c3c,#c0392b); }
     .icon.sales { background: linear-gradient(45deg,#2ecc71,#27ae60); }
+    .icon.expiry { background: linear-gradient(45deg,#8e44ad,#6c3483); }
+
+    /* ===== الدفعات وتواريخ الانتهاء ===== */
+    .expiry-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; white-space: nowrap; }
+    .expiry-ok { background: #e8f6ef; color: #1e8449; }
+    .expiry-soon { background: #fdebd0; color: #a04000; }
+    .expiry-expired { background: #fadbd8; color: #922b21; }
+    .expiry-none { background: #eee; color: #666; }
+    .card-stock { margin-top: 6px; font-size: 13px; color: #555; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .stat-sub { font-size: 12px; color: #888; }
+    .batches-table input.form-control { padding: 6px; min-width: 0; }
+    .batches-table td, .batches-table th { padding: 6px; }
+    .batch-expired-row td { background: #fdf2f2; }
+    .add-batch-row { display: grid; grid-template-columns: 1fr 1fr 90px auto; gap: 8px; align-items: end; margin-top: 10px; }
+    .add-batch-row label, .field-label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; }
+    .modal-panel { background: #fff; padding: 20px; border-radius: 8px; max-width: 680px; width: 100%; max-height: 92vh; overflow: auto; }
     
     .orders-tabs {
       display: flex;
@@ -616,6 +632,28 @@
     .user-inactive td { opacity: .55; }
     .btn:disabled { opacity: .6; cursor: not-allowed; }
 
+    /* ===== التنقل على الهاتف ===== */
+    .mobile-only, .menu-toggle, .bottom-nav { display: none; }
+    .drawer-tools { list-style: none; margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee; }
+    .drawer-tools a { display: block; padding: 10px; color: var(--text-color); text-decoration: none; border-radius: 4px; }
+    .drawer-tools a:hover { background: var(--accent-color); }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1400;
+      background: #fff; border-top: 1px solid #ddd; box-shadow: 0 -2px 10px rgba(0,0,0,.08);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .bottom-nav button {
+      flex: 1; position: relative; background: none; border: none; cursor: pointer;
+      padding: 8px 2px 6px; color: #667; font-size: 11px; font-family: inherit;
+      display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 56px;
+    }
+    .bottom-nav button i { font-size: 18px; }
+    .bottom-nav button.active { color: var(--primary-color); font-weight: bold; }
+    .nav-badge {
+      position: absolute; top: 4px; left: 50%; margin-left: 4px; min-width: 18px; height: 18px; padding: 0 5px;
+      border-radius: 9px; background: var(--danger-color); color: #fff; font-size: 11px; line-height: 18px;
+    }
+
     @media (max-width: 768px) {
       .main-content {
         grid-template-columns: 1fr;
@@ -631,15 +669,32 @@
         overflow-x: auto;
       }
       
+      /* القائمة الجانبية تصبح درجاً ينزلق من اليمين */
       .sidebar {
-        display: none;
+        position: fixed; top: 0; right: 0; bottom: 0; z-index: 1600;
+        width: 270px; max-width: 85vw; border-radius: 0; overflow-y: auto;
+        transform: translateX(100%); transition: transform .25s ease;
+        box-shadow: -4px 0 20px rgba(0,0,0,.2);
       }
-      
-      .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
+      .sidebar.open { transform: none; }
+      .drawer-backdrop:not([hidden]) {
+        position: fixed; inset: 0; z-index: 1550; background: rgba(0,0,0,.45);
       }
+      .mobile-only { display: block; }
+      .menu-toggle { display: inline-flex; align-items: center; gap: 6px; }
+
+      /* ترويسة مضغوطة */
+      header { padding: 8px 0; }
+      .header-content { flex-direction: row; gap: 8px; }
+      .header-title, .user-controls, .user-info-role { display: none; }
+      .header-actions { width: 100%; justify-content: space-between; gap: 8px !important; }
+      .header-logo img { height: 44px !important; }
+      .container { width: 100%; padding: 12px; }
+
+      /* شريط التنقل السفلي */
+      .bottom-nav { display: flex; }
+      body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+      .notification { left: 12px; right: 12px; top: 12px; }
       
       .card-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -680,6 +735,15 @@
 </head>
 <body>
   <div class="notification" id="notification"></div>
+
+  <!-- شريط التنقل السفلي (الهاتف فقط) -->
+  <nav class="bottom-nav" aria-label="التنقل">
+    <button type="button" data-page="home" class="active"><i class="fas fa-home"></i><span>الرئيسية</span></button>
+    <button type="button" data-page="products"><i class="fas fa-pills"></i><span>الأدوية</span></button>
+    <button type="button" data-page="cart"><i class="fas fa-shopping-cart"></i><span>السلة</span><b id="cart-badge" class="nav-badge" hidden>0</b></button>
+    <button type="button" data-page="orders"><i class="fas fa-clipboard-list"></i><span>الطلبات</span></button>
+    <button type="button" id="bottom-more"><i class="fas fa-ellipsis-h"></i><span>المزيد</span></button>
+  </nav>
 
   <!-- شاشة تسجيل الدخول -->
   <div id="login-screen" class="auth-overlay" style="display:none">
@@ -728,9 +792,12 @@
   <header>
     <div class="container">
       <div class="header-content">
-        <div style="font-weight:700"> نظام مبيعات ادوية شركة دجلة/ الديوانية</div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="height:40px; display:flex; align-items:center; justify-content:center; 
+        <div class="header-title" style="font-weight:700"> نظام مبيعات ادوية شركة دجلة/ الديوانية</div>
+        <div class="header-actions" style="display:flex;align-items:center;gap:12px">
+          <button id="menu-toggle" class="btn btn-light menu-toggle" type="button" aria-label="القائمة" aria-controls="sidebar" aria-expanded="false">
+            <i class="fas fa-bars"></i> القائمة
+          </button>
+          <div class="header-logo" style="height:40px; display:flex; align-items:center; justify-content:center; 
                       border-radius:4px; font-weight:bold; font-size:16px;">
             <img src="images/dijla.png" alt="شعار شركة دجلة" style="height:80px;object-fit:contain">
           </div>
@@ -754,7 +821,7 @@
 
   <div class="container">
     <div class="main-content">
-      <aside class="sidebar">
+      <aside class="sidebar" id="sidebar">
         <h3>القائمة</h3>
         <ul>
           <li><a href="#" class="sidebar-link active" data-page="home"><i class="fas fa-home"></i> الرئيسية</a></li>
@@ -767,7 +834,13 @@
           <li><a href="#" class="sidebar-link" data-page="reports" data-perm="reports"><i class="fas fa-chart-bar"></i> التقارير</a></li>
           <li><a href="#" class="sidebar-link" data-page="users" data-perm="users"><i class="fas fa-users-cog"></i> المستخدمون</a></li>
         </ul>
+        <!-- على الهاتف تُخفى أزرار الترويسة، فنضعها هنا -->
+        <ul class="mobile-only drawer-tools">
+          <li data-perm="backup"><a href="#" data-click="backup-data"><i class="fas fa-download"></i> نسخ احتياطي</a></li>
+          <li data-perm="backup"><a href="#" data-click="restore-btn"><i class="fas fa-upload"></i> استعادة بيانات</a></li>
+        </ul>
       </aside>
+      <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
 
       <main class="content">
         <!-- الصفحة الرئيسية -->
@@ -793,6 +866,14 @@
               <div class="body">
                 <div class="title">أدوية منخفضة المخزون</div>
                 <div id="low-stock" class="value">0</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="icon expiry"><i class="fas fa-hourglass-half"></i></div>
+              <div class="body">
+                <div class="title">قريبة الانتهاء / منتهية</div>
+                <div class="value"><span id="near-expiry-count">0</span> / <span id="expired-count">0</span></div>
+                <div class="stat-sub">خلال <span class="expiry-days-label">90</span> يوماً</div>
               </div>
             </div>
             <div class="stat-card">
@@ -865,6 +946,16 @@
                 <input id="product-stock" class="form-control" placeholder="الكمية" type="number" min="0" required>
               </div>
             </div>
+            <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap">
+              <div class="form-group" style="flex:1;min-width:160px">
+                <label class="field-label" for="product-batch-no">رقم الدفعة (Lot / Batch)</label>
+                <input id="product-batch-no" class="form-control" maxlength="50" placeholder="اختياري" dir="ltr">
+              </div>
+              <div class="form-group" style="flex:1;min-width:160px">
+                <label class="field-label" for="product-expiry">تاريخ الانتهاء</label>
+                <input id="product-expiry" class="form-control" type="date">
+              </div>
+            </div>
             <div class="form-group">
               <input id="product-image" class="form-control" type="file" accept="image/*">
             </div>
@@ -883,7 +974,8 @@
                   <th>الاسم</th>
                   <th>النوع</th>
                   <th>السعر</th>
-                  <th>الكمية</th>
+                  <th>الكمية المتاحة</th>
+                  <th>أقرب انتهاء</th>
                   <th>إجراءات</th>
                 </tr>
               </thead>
@@ -893,7 +985,7 @@
 
           <!-- نافذة تعديل الدواء -->
           <div id="edit-medicine-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:1000">
-            <div style="background:#fff;padding:20px;border-radius:8px;max-width:500px;width:90%">
+            <div class="modal-panel">
               <h3>تعديل الدواء</h3>
               <div class="form-group">
                 <input id="edit-medicine-name" class="form-control" placeholder="اسم الدواء">
@@ -901,20 +993,34 @@
               <div class="form-group">
                 <input id="edit-medicine-type" class="form-control" placeholder="نوع الدواء">
               </div>
-              <div style="display:flex;gap:10px;margin-bottom:15px">
-                <div class="form-group" style="flex:1">
-                  <input id="edit-medicine-price" class="form-control" type="number" step="0.01" min="0" placeholder="السعر">
-                </div>
-                <div class="form-group" style="flex:1">
-                  <input id="edit-medicine-stock" class="form-control" type="number" min="0" placeholder="الكمية">
-                </div>
+              <div class="form-group">
+                <input id="edit-medicine-price" class="form-control" type="number" step="0.01" min="0" placeholder="السعر">
               </div>
               <div class="form-group">
                 <input id="edit-medicine-image" class="form-control" type="file" accept="image/*">
               </div>
               <div style="display:flex;gap:10px;margin-top:15px">
                 <button id="save-medicine-changes" class="btn btn-success">حفظ التغييرات</button>
-                <button id="cancel-edit-medicine" class="btn btn-danger">إلغاء</button>
+                <button id="cancel-edit-medicine" class="btn btn-danger">إغلاق</button>
+              </div>
+
+              <h3 style="margin-top:22px">الدفعات والكميات</h3>
+              <p class="stat-sub" style="margin-bottom:8px">
+                تعديلات الدفعات تُحفظ فوراً. عند التجهيز يُصرف من الدفعة الأقرب انتهاءً أولاً، والدفعات المنتهية لا تُباع.
+              </p>
+              <div style="overflow:auto">
+                <table class="batches-table">
+                  <thead>
+                    <tr><th>رقم الدفعة</th><th>تاريخ الانتهاء</th><th>الكمية</th><th>الحالة</th><th></th></tr>
+                  </thead>
+                  <tbody id="edit-batches-table"></tbody>
+                </table>
+              </div>
+              <div class="add-batch-row">
+                <div><label for="new-batch-no">رقم دفعة جديدة</label><input id="new-batch-no" class="form-control" maxlength="50" dir="ltr"></div>
+                <div><label for="new-batch-expiry">تاريخ الانتهاء</label><input id="new-batch-expiry" class="form-control" type="date"></div>
+                <div><label for="new-batch-qty">الكمية</label><input id="new-batch-qty" class="form-control" type="number" min="1"></div>
+                <button id="add-batch-btn" class="btn btn-primary" type="button">إضافة دفعة</button>
               </div>
             </div>
           </div>
@@ -1026,8 +1132,10 @@
                 <th>اسم الدواء</th>
                 <th>النوع</th>
                 <th>السعر</th>
-                <th>الكمية</th>
+                <th>الكمية المتاحة</th>
                 <th>حالة المخزون</th>
+                <th>أقرب انتهاء</th>
+                <th>كمية منتهية</th>
               </tr>
             </thead>
             <tbody id="inventory-table"></tbody>
@@ -1067,6 +1175,10 @@
               <div class="report-type-option">
                 <input type="checkbox" id="report-low-stock" checked>
                 <label for="report-low-stock">الأدوية منخفضة المخزون</label>
+              </div>
+              <div class="report-type-option">
+                <input type="checkbox" id="report-expiry" checked>
+                <label for="report-expiry">الدفعات القريبة من الانتهاء والمنتهية</label>
               </div>
               <div class="report-type-option">
                 <input type="checkbox" id="report-total-products" checked>
@@ -1157,6 +1269,46 @@
     const LOW_STOCK_THRESHOLD = 10;      // أقل من هذا = منخفض
     const CRITICAL_STOCK_THRESHOLD = 5;  // أقل من هذا = منخفض جداً
     const isLowStock = p => Number(p.stock) < LOW_STOCK_THRESHOLD;
+
+    // ===== تواريخ الانتهاء =====
+    const EXPIRY_WARNING_DAYS = 90; // دفعة تنتهي خلال هذه المدة = قريبة الانتهاء
+
+    /** عدد الأيام من اليوم حتى تاريخ YYYY-MM-DD (سالب = منتهية). */
+    function daysUntil(dateStr) {
+      if (!dateStr) return null;
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const now = new Date();
+      return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
+    }
+
+    function expiryInfo(dateStr) {
+      const days = daysUntil(dateStr);
+      if (days === null) return { cls: 'expiry-none', label: 'بلا تاريخ', state: 'none', days };
+      if (days < 0) return { cls: 'expiry-expired', label: `منتهية ${dateStr}`, state: 'expired', days };
+      if (days <= EXPIRY_WARNING_DAYS) return { cls: 'expiry-soon', label: `${dateStr} (بعد ${days} يوم)`, state: 'soon', days };
+      return { cls: 'expiry-ok', label: dateStr, state: 'ok', days };
+    }
+
+    function expiryTag(dateStr) {
+      const info = expiryInfo(dateStr);
+      // التاريخ داخل <bdi> حتى لا ينقلب ترتيب أرقامه وسط النص العربي
+      const date = `<bdi dir="ltr">${escapeHtml(dateStr || '')}</bdi>`;
+      const html = info.state === 'none' ? 'بلا تاريخ'
+        : info.state === 'expired' ? `منتهية ${date}`
+        : info.state === 'soon' ? `${date} (بعد ${info.days} يوم)`
+        : date;
+      return `<span class="expiry-tag ${info.cls}">${html}</span>`;
+    }
+
+    /** كل الدفعات المنتهية والقريبة من الانتهاء، مرتبة حسب التاريخ. */
+    function getExpiryBatches() {
+      const list = [];
+      products.forEach(p => (p.batches || []).forEach(b => {
+        const info = expiryInfo(b.expiryDate);
+        if (info.state === 'expired' || info.state === 'soon') list.push({ product: p, batch: b, info });
+      }));
+      return list.sort((a, b) => a.info.days - b.info.days);
+    }
 
     // صورة افتراضية محلية (تعمل بدون إنترنت، بديلاً عن via.placeholder.com المتوقفة)
     const PLACEHOLDER_IMAGE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
@@ -1617,6 +1769,10 @@
       document.getElementById('password-form').addEventListener('submit', handlePasswordChange);
       document.getElementById('cancel-password-change').addEventListener('click', closePasswordModal);
 
+      // الدفعات في نافذة تعديل الدواء
+      document.getElementById('edit-batches-table').addEventListener('click', handleBatchTableClick);
+      document.getElementById('add-batch-btn').addEventListener('click', addBatch);
+
       // المستخدمون
       document.getElementById('add-user-form').addEventListener('submit', addUser);
       document.getElementById('users-table').addEventListener('click', handleUsersTableClick);
@@ -1628,7 +1784,33 @@
           e.preventDefault();
           document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
           this.classList.add('active');
+          document.querySelectorAll('.bottom-nav button[data-page]').forEach(b => {
+            b.classList.toggle('active', b.dataset.page === this.dataset.page);
+          });
+          closeDrawer();
           showPage(this.dataset.page);
+          window.scrollTo(0, 0);
+        });
+      });
+
+      // التنقل على الهاتف: الشريط السفلي يستخدم نفس روابط القائمة، و"المزيد" يفتح الدرج
+      document.querySelector('.bottom-nav').addEventListener('click', function(e) {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        if (btn.id === 'bottom-more') return openDrawer();
+        const link = document.querySelector(`.sidebar-link[data-page="${btn.dataset.page}"]`);
+        if (link) link.click();
+      });
+      document.getElementById('menu-toggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.contains('open') ? closeDrawer() : openDrawer();
+      });
+      document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+      document.querySelectorAll('.drawer-tools a[data-click]').forEach(a => {
+        a.addEventListener('click', function(e) {
+          e.preventDefault();
+          closeDrawer();
+          document.getElementById(this.dataset.click).click();
         });
       });
 
@@ -1691,6 +1873,18 @@
       document.getElementById('generate-report').addEventListener('click', generateReport);
       document.getElementById('print-report').addEventListener('click', printReport);
       document.getElementById('export-report').addEventListener('click', exportReportToExcel);
+    }
+
+    function openDrawer() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('drawer-backdrop').hidden = false;
+      document.getElementById('menu-toggle').setAttribute('aria-expanded', 'true');
+    }
+
+    function closeDrawer() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('drawer-backdrop').hidden = true;
+      document.getElementById('menu-toggle').setAttribute('aria-expanded', 'false');
     }
 
     function showPage(pageId) {
@@ -1762,6 +1956,11 @@
               <div class="card-price">${escapeHtml(product.price)} د.ع</div>
               <div class="card-type badge">${escapeHtml(product.type || '—')}</div>
             </div>
+            <div class="card-stock">
+              <span>المتاح: <b>${escapeHtml(product.stock)}</b></span>
+              ${product.nearestExpiry ? expiryTag(product.nearestExpiry) : ''}
+              ${product.expiredStock > 0 ? `<span class="expiry-tag expiry-expired">منتهي: ${escapeHtml(product.expiredStock)}</span>` : ''}
+            </div>
             <div class="quantity-controls" style="margin-top:10px">
               <button class="quantity-btn minus" data-id="${escapeHtml(product.id)}">-</button>
               <input class="quantity-input" data-id="${escapeHtml(product.id)}" type="number" value="1" min="1">
@@ -1816,12 +2015,16 @@
     }
 
     // يبني بيانات الدواء للإرسال، مع ضغط الصورة قبل الرفع (أقصى 1200px)
-    async function buildProductForm(name, type, price, stock, imageFile) {
+    async function buildProductForm(name, type, price, stock, imageFile, firstBatch) {
       const form = new FormData();
       form.append('name', name);
       form.append('type', type);
       form.append('price', String(price));
       form.append('stock', String(stock));
+      if (firstBatch) {
+        form.append('batchNo', firstBatch.batchNo);
+        form.append('expiryDate', firstBatch.expiryDate);
+      }
       if (imageFile) {
         let blob = imageFile;
         try {
@@ -1862,7 +2065,12 @@
       submitBtn.disabled = true;
       try {
         const file = imageInput && imageInput.files && imageInput.files[0];
-        const form = await buildProductForm(name, type, price, stock, file);
+        const firstBatch = {
+          batchNo: document.getElementById('product-batch-no').value.trim(),
+          expiryDate: document.getElementById('product-expiry').value
+        };
+        if (!confirmPastExpiry(firstBatch.expiryDate)) return;
+        const form = await buildProductForm(name, type, price, stock, file, firstBatch);
         await api('/products', { method: 'POST', body: form });
         document.getElementById('add-product-form').reset();
         await refreshAndRender();
@@ -1913,6 +2121,11 @@
     function updateCart() {
       const container = document.getElementById('cart-items');
       container.innerHTML = '';
+
+      // عدّاد السلة في شريط الهاتف
+      const badge = document.getElementById('cart-badge');
+      badge.textContent = cart.length;
+      badge.hidden = cart.length === 0;
 
       if (cart.length === 0) {
         container.innerHTML = '<p style="text-align:center;padding:40px;color:#666">السلة فارغة</p>';
@@ -2221,7 +2434,8 @@
           <td>${escapeHtml(product.name)}</td>
           <td>${escapeHtml(product.type)}</td>
           <td>${escapeHtml(product.price)} د.ع</td>
-          <td>${escapeHtml(product.stock)}</td>
+          <td>${escapeHtml(product.stock)}${product.expiredStock > 0 ? ` <span class="expiry-tag expiry-expired">+${escapeHtml(product.expiredStock)} منتهي</span>` : ''}</td>
+          <td>${product.nearestExpiry ? expiryTag(product.nearestExpiry) : '—'}</td>
           <td>
             ${checkPermission(PERM.PRODUCTS_WRITE) ? `<button class="btn btn-primary edit-medicine" data-id="${escapeHtml(product.id)}">تعديل</button>` : ''}
             ${checkPermission(PERM.PRODUCTS_DELETE) ? `<button class="btn btn-danger delete-medicine" data-id="${escapeHtml(product.id)}">حذف</button>` : ''}
@@ -2251,8 +2465,90 @@
       document.getElementById('edit-medicine-name').value = product.name;
       document.getElementById('edit-medicine-type').value = product.type;
       document.getElementById('edit-medicine-price').value = product.price;
-      document.getElementById('edit-medicine-stock').value = product.stock;
+      document.getElementById('edit-medicine-image').value = '';
+      renderEditBatches();
       document.getElementById('edit-medicine-modal').style.display = 'flex';
+    }
+
+    // ===== إدارة الدفعات داخل نافذة التعديل (كل عملية تُحفظ فوراً على الخادم) =====
+    function renderEditBatches() {
+      const product = products.find(p => p.id === currentEditingMedicineId);
+      const table = document.getElementById('edit-batches-table');
+      if (!product) { table.innerHTML = ''; return; }
+      const batches = product.batches || [];
+      if (batches.length === 0) {
+        table.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666">لا توجد دفعات؛ أضف دفعة بالأسفل</td></tr>';
+        return;
+      }
+      table.innerHTML = batches.map(b => `
+        <tr class="${b.expired ? 'batch-expired-row' : ''}" data-batch-id="${escapeHtml(b.id)}">
+          <td><input class="form-control batch-no" value="${escapeHtml(b.batchNo)}" maxlength="50" dir="ltr" placeholder="—"></td>
+          <td><input class="form-control batch-expiry" type="date" value="${escapeHtml(b.expiryDate || '')}"></td>
+          <td><input class="form-control batch-qty" type="number" min="0" value="${escapeHtml(b.quantity)}" style="width:80px"></td>
+          <td>${expiryTag(b.expiryDate)}</td>
+          <td style="white-space:nowrap">
+            <button type="button" class="btn btn-success save-batch" title="حفظ"><i class="fas fa-save"></i> حفظ</button>
+            <button type="button" class="btn btn-danger delete-batch" title="حذف"><i class="fas fa-trash"></i> حذف</button>
+          </td>
+        </tr>`).join('');
+    }
+
+    /** ينفّذ عملية على دفعة ثم يحدّث البيانات والنافذة. */
+    async function runBatchRequest(path, options, successMessage) {
+      let ok = false;
+      try {
+        await api(`/products/${currentEditingMedicineId}/batches${path}`, options);
+        showNotification(successMessage, 'success');
+        ok = true;
+      } catch (err) {
+        showApiError(err, 'تعذّر حفظ الدفعة');
+      }
+      await refreshAndRender();
+      renderEditBatches();
+      return ok;
+    }
+
+    function confirmPastExpiry(dateStr) {
+      const days = daysUntil(dateStr);
+      return days === null || days >= 0 || confirm('تاريخ الانتهاء في الماضي، وهذه الكمية لن تُباع. هل تريد المتابعة؟');
+    }
+
+    function handleBatchTableClick(e) {
+      const btn = e.target.closest('button');
+      const row = e.target.closest('tr[data-batch-id]');
+      if (!btn || !row) return;
+      const batchId = row.dataset.batchId;
+      if (btn.classList.contains('save-batch')) {
+        const quantity = parseInt(row.querySelector('.batch-qty').value, 10);
+        const expiryDate = row.querySelector('.batch-expiry').value;
+        if (!Number.isInteger(quantity) || quantity < 0) {
+          showNotification('الكمية يجب أن تكون عدداً صحيحاً (0 أو أكثر)', 'error');
+          return;
+        }
+        if (!confirmPastExpiry(expiryDate)) return;
+        runBatchRequest(`/${batchId}`, {
+          method: 'PATCH',
+          body: { batchNo: row.querySelector('.batch-no').value.trim(), expiryDate, quantity }
+        }, 'تم حفظ الدفعة');
+      } else if (btn.classList.contains('delete-batch')) {
+        if (!confirm('حذف هذه الدفعة وكل كميتها من المخزون؟ (مثلاً بعد إتلاف دفعة منتهية)')) return;
+        runBatchRequest(`/${batchId}`, { method: 'DELETE' }, 'تم حذف الدفعة');
+      }
+    }
+
+    async function addBatch() {
+      const quantity = parseInt(document.getElementById('new-batch-qty').value, 10);
+      const expiryDate = document.getElementById('new-batch-expiry').value;
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        showNotification('أدخل كمية الدفعة الجديدة', 'error');
+        return;
+      }
+      if (!confirmPastExpiry(expiryDate)) return;
+      const ok = await runBatchRequest('', {
+        method: 'POST',
+        body: { batchNo: document.getElementById('new-batch-no').value.trim(), expiryDate, quantity }
+      }, 'تمت إضافة الدفعة');
+      if (ok) ['new-batch-no', 'new-batch-expiry', 'new-batch-qty'].forEach(id => { document.getElementById(id).value = ''; });
     }
 
     function closeEditModal() {
@@ -2266,7 +2562,7 @@
       const name = document.getElementById('edit-medicine-name').value.trim();
       const type = document.getElementById('edit-medicine-type').value.trim();
       const price = parseFloat(document.getElementById('edit-medicine-price').value) || 0;
-      const stock = parseInt(document.getElementById('edit-medicine-stock').value) || 0;
+      const stock = 0; // الكميات تُدار من قسم الدفعات
       const imageInput = document.getElementById('edit-medicine-image');
 
       if (!checkPermission(PERM.PRODUCTS_WRITE)) {
@@ -2289,6 +2585,7 @@
       try {
         const file = imageInput && imageInput.files && imageInput.files[0];
         const form = await buildProductForm(name, type, price, stock, file);
+        form.delete('stock');
         await api(`/products/${currentEditingMedicineId}`, { method: 'PUT', body: form });
         closeEditModal();
         await refreshAndRender();
@@ -2322,6 +2619,11 @@
       document.getElementById('total-products').textContent = products.length;
       document.getElementById('pending-orders').textContent = orders.filter(o => o.status === STATUS.PENDING).length;
       document.getElementById('low-stock').textContent = products.filter(isLowStock).length;
+      const expiryBatches = getExpiryBatches();
+      const countProducts = state => new Set(expiryBatches.filter(x => x.info.state === state).map(x => x.product.id)).size;
+      document.getElementById('near-expiry-count').textContent = countProducts('soon');
+      document.getElementById('expired-count').textContent = countProducts('expired');
+      document.querySelectorAll('.expiry-days-label').forEach(el => { el.textContent = EXPIRY_WARNING_DAYS; });
       
       const totalSales = orders
         .filter(order => order.status === STATUS.COMPLETED)
@@ -2339,7 +2641,7 @@
         let statusColor = '';
         
         if (product.stock === 0) {
-          status = 'نافذ';
+          status = product.expiredStock > 0 ? 'نافذ (المتبقي منتهي)' : 'نافذ';
           statusColor = 'red';
         } else if (product.stock < CRITICAL_STOCK_THRESHOLD) {
           status = 'منخفض جداً';
@@ -2362,6 +2664,8 @@
           <td>${escapeHtml(product.price)} د.ع</td>
           <td>${escapeHtml(product.stock)}</td>
           <td style="color:${statusColor};font-weight:bold">${status}</td>
+          <td>${product.nearestExpiry ? expiryTag(product.nearestExpiry) : '—'}</td>
+          <td>${product.expiredStock > 0 ? `<span class="expiry-tag expiry-expired">${escapeHtml(product.expiredStock)}</span>` : '—'}</td>
         `;
         inventoryTable.appendChild(row);
       });
@@ -2420,6 +2724,7 @@
         topSelling: document.getElementById('report-top-selling').checked,
         leastSelling: document.getElementById('report-least-selling').checked,
         lowStock: document.getElementById('report-low-stock').checked,
+        expiry: document.getElementById('report-expiry').checked,
         totalProducts: document.getElementById('report-total-products').checked,
         totalSales: document.getElementById('report-total-sales').checked,
         charts: document.getElementById('report-charts').checked
@@ -2617,6 +2922,32 @@
         reportHTML += '</div>';
       }
       
+      // الدفعات المنتهية والقريبة من الانتهاء
+      if (reportTypes.expiry) {
+        reportHTML += '<div class="report-section">';
+        reportHTML += `<h3><i class="fas fa-hourglass-half"></i> الدفعات المنتهية والتي تنتهي خلال ${EXPIRY_WARNING_DAYS} يوماً</h3>`;
+        const expiryRows = getExpiryBatches();
+        if (expiryRows.length > 0) {
+          reportHTML += `
+            <table class="report-table">
+              <thead><tr><th>اسم الدواء</th><th>رقم الدفعة</th><th>تاريخ الانتهاء</th><th>الكمية</th><th>القيمة</th></tr></thead>
+              <tbody>
+              ${expiryRows.map(({ product, batch }) => `
+                <tr>
+                  <td>${escapeHtml(product.name)}</td>
+                  <td dir="ltr" style="text-align:right">${escapeHtml(batch.batchNo || '—')}</td>
+                  <td>${expiryTag(batch.expiryDate)}</td>
+                  <td>${escapeHtml(batch.quantity)}</td>
+                  <td>${(product.price * batch.quantity).toFixed(2)} د.ع</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>`;
+        } else {
+          reportHTML += '<p style="text-align: center; color: #666; padding: 20px;">لا توجد دفعات منتهية أو قريبة من الانتهاء</p>';
+        }
+        reportHTML += '</div>';
+      }
+
       // إضافة الرسوم البيانية إذا تم اختيارها
       if (reportTypes.charts) {
         reportHTML += generateCharts(startDate, endDate);
@@ -2852,6 +3183,7 @@
         topSelling: document.getElementById('report-top-selling').checked,
         leastSelling: document.getElementById('report-least-selling').checked,
         lowStock: document.getElementById('report-low-stock').checked,
+        expiry: document.getElementById('report-expiry').checked,
         totalProducts: document.getElementById('report-total-products').checked,
         totalSales: document.getElementById('report-total-sales').checked
       };
@@ -2903,6 +3235,15 @@
           p.stock === 0 ? 'نافذ' : p.stock < CRITICAL_STOCK_THRESHOLD ? 'منخفض جداً' : 'منخفض'
         ]));
         sheets.push({ name: 'منخفض المخزون', rows });
+      }
+
+      if (opts.expiry) {
+        const rows = [['اسم الدواء', 'رقم الدفعة', 'تاريخ الانتهاء', 'الأيام المتبقية', 'الكمية', 'القيمة (د.ع)', 'الحالة']];
+        getExpiryBatches().forEach(({ product, batch, info }) => rows.push([
+          product.name, batch.batchNo, batch.expiryDate, info.days, batch.quantity, product.price * batch.quantity,
+          info.state === 'expired' ? 'منتهية' : 'قريبة الانتهاء'
+        ]));
+        sheets.push({ name: 'الصلاحية', rows });
       }
 
       return sheets;
@@ -2982,6 +3323,8 @@
 
     // دوال مساعدة
     function printInvoice(order, existingWindow) {
+      // الطلبات المجهزة تُظهر من أي دفعة صُرف كل صنف وتاريخ انتهائها
+      const hasBatches = order.items.some(item => item.batches && item.batches.length > 0);
       const printWindow = existingWindow || window.open('', '_blank', 'width=800,height=600');
       if (!printWindow) {
         showNotification('المتصفح منع فتح نافذة الفاتورة، اسمح بالنوافذ المنبثقة لهذا الموقع', 'warning');
@@ -3032,6 +3375,7 @@
                 <th>النوع</th>
                 <th>السعر</th>
                 <th>الكمية</th>
+                ${hasBatches ? '<th>الدفعة / الانتهاء</th>' : ''}
                 <th>المجموع</th>
               </tr>
             </thead>
@@ -3043,6 +3387,8 @@
                   <td>${escapeHtml(item.type)}</td>
                   <td>${escapeHtml(item.price)} د.ع</td>
                   <td>${escapeHtml(item.quantity)}</td>
+                  ${hasBatches ? `<td style="font-size:12px">${(item.batches || []).map(b =>
+                    `${escapeHtml(b.batchNo || '—')} · ${escapeHtml(b.expiryDate || 'بلا تاريخ')} × ${escapeHtml(b.quantity)}`).join('<br>')}</td>` : ''}
                   <td>${(item.price * item.quantity).toFixed(2)} د.ع</td>
                 </tr>
               `).join('')}
@@ -3244,10 +3590,15 @@
 
     // نظام تنبيهات المخزون المنخفض
     function checkLowStockAlerts() {
+      const parts = [];
       const lowStockProducts = products.filter(isLowStock);
-      if (lowStockProducts.length > 0) {
-        showNotification(`هناك ${lowStockProducts.length} منتج منخفض المخزون`, 'warning');
-      }
+      if (lowStockProducts.length > 0) parts.push(`${lowStockProducts.length} منتج منخفض المخزون`);
+      const expiry = getExpiryBatches();
+      const expired = expiry.filter(x => x.info.state === 'expired').length;
+      const soon = expiry.length - expired;
+      if (expired > 0) parts.push(`${expired} دفعة منتهية الصلاحية`);
+      if (soon > 0) parts.push(`${soon} دفعة تنتهي خلال ${EXPIRY_WARNING_DAYS} يوماً`);
+      if (parts.length > 0) showNotification('تنبيه: ' + parts.join(' · '), 'warning');
     }
 
     // توليد الرسوم البيانية للتقارير

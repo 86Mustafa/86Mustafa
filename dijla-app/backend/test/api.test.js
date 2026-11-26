@@ -186,7 +186,9 @@ describe('الأدوية والطلبات', () => {
   test('التجهيز يفشل كاملاً إذا نقص صنف واحد (معاملة)', async () => {
     const p2 = (await admin.post('/api/products').field('name', 'أموكسيسيلين').field('type', 'حبوب').field('price', '5000').field('stock', '5')).body;
     const order = (await admin.post('/api/orders').send({ pharmacy: 'ص', items: [{ productId, quantity: 2 }, { productId: p2.id, quantity: 5 }] })).body;
-    await admin.put(`/api/products/${p2.id}`).field('name', p2.name).field('type', p2.type).field('price', '5000').field('stock', '1');
+    // جرد: تصحيح كمية الدفعة إلى 1
+    const fix = await admin.patch(`/api/products/${p2.id}/batches/${p2.batches[0].id}`).send({ quantity: 1 });
+    assert.equal(fix.body.stock, 1);
     assert.equal((await admin.post(`/api/orders/${order.id}/complete`)).status, 409);
     assert.equal((await admin.get(`/api/products/${productId}`)).body.stock, 10, 'لم يُخصم الصنف الأول');
   });
@@ -199,6 +201,98 @@ describe('الأدوية والطلبات', () => {
     assert.equal(after.items[0].name, 'مؤقت');
     assert.equal(after.items[0].id, null);
     assert.equal((await admin.post(`/api/orders/${order.id}/complete`)).status, 409);
+  });
+});
+
+describe('الدفعات وتواريخ الانتهاء', () => {
+  let admin, productId;
+  const { localDate } = require('../src/dates');
+  const day = (offset) => localDate('Asia/Baghdad', new Date(Date.now() + offset * 86400000));
+
+  before(async () => {
+    admin = await login('admin', 'admin-pass-456');
+    // دفعة أولى عند الإضافة
+    const res = await admin.post('/api/products')
+      .field('name', 'أوميبرازول').field('type', 'حبوب').field('price', '1000')
+      .field('stock', '5').field('batchNo', 'LATE').field('expiryDate', day(400));
+    assert.equal(res.status, 201, JSON.stringify(res.body));
+    assert.deepEqual(res.body.batches.map((b) => [b.batchNo, b.quantity]), [['LATE', 5]]);
+    productId = res.body.id;
+  });
+
+  test('التحقق من بيانات الدفعة', async () => {
+    for (const body of [{ quantity: -1 }, { quantity: 1, expiryDate: '2027-02-30' }, { quantity: 1, expiryDate: '01/02/2027' }, { quantity: 1.5 }]) {
+      const res = await admin.post(`/api/products/${productId}/batches`).send(body);
+      assert.equal(res.status, 400, JSON.stringify(body));
+    }
+    assert.equal((await admin.post('/api/products/99999/batches').send({ quantity: 1 })).status, 404);
+  });
+
+  test('المخزون المتاح يستثني الدفعات المنتهية', async () => {
+    await admin.post(`/api/products/${productId}/batches`).send({ batchNo: 'EXPIRED', expiryDate: day(-1), quantity: 7 });
+    await admin.post(`/api/products/${productId}/batches`).send({ batchNo: 'SOON', expiryDate: day(30), quantity: 3 });
+    const p = (await admin.get(`/api/products/${productId}`)).body;
+    assert.equal(p.stock, 8, 'LATE 5 + SOON 3');
+    assert.equal(p.expiredStock, 7);
+    assert.equal(p.nearestExpiry, day(30));
+    assert.deepEqual(p.batches.map((b) => b.batchNo), ['EXPIRED', 'SOON', 'LATE'], 'مرتبة حسب الانتهاء');
+    assert.equal(p.batches[0].expired, true);
+  });
+
+  test('لا يمكن بيع كمية من دفعة منتهية', async () => {
+    const res = await admin.post('/api/orders').send({ pharmacy: 'ص', items: [{ productId, quantity: 9 }] });
+    assert.equal(res.status, 409);
+    assert.match(res.body.error, /غير المنتهية/);
+  });
+
+  test('التجهيز يصرف من الأقرب انتهاءً أولاً (FEFO) ويسجّل الدفعات', async () => {
+    const order = (await admin.post('/api/orders').send({ pharmacy: 'صيدلية FEFO', items: [{ productId, quantity: 4 }] })).body;
+    const done = await admin.post(`/api/orders/${order.id}/complete`);
+    assert.equal(done.status, 200, JSON.stringify(done.body));
+    assert.deepEqual(done.body.items[0].batches.map((b) => [b.batchNo, b.quantity]), [['SOON', 3], ['LATE', 1]]);
+    const p = (await admin.get(`/api/products/${productId}`)).body;
+    assert.deepEqual(p.batches.map((b) => [b.batchNo, b.quantity]), [['EXPIRED', 7], ['LATE', 4]], 'SOON نفدت، المنتهية لم تُمس');
+
+    // الاسترجاع يعيد الكميات لنفس الدفعات
+    const ret = await admin.post(`/api/orders/${order.id}/return`);
+    assert.equal(ret.status, 200);
+    const after = (await admin.get(`/api/products/${productId}`)).body;
+    assert.deepEqual(after.batches.map((b) => [b.batchNo, b.quantity]), [['EXPIRED', 7], ['SOON', 3], ['LATE', 5]]);
+  });
+
+  test('الاسترجاع يعيد إنشاء الدفعة إذا حُذفت', async () => {
+    const order = (await admin.post('/api/orders').send({ pharmacy: 'ص', items: [{ productId, quantity: 2 }] })).body;
+    await admin.post(`/api/orders/${order.id}/complete`);
+    const p = (await admin.get(`/api/products/${productId}`)).body;
+    const soon = p.batches.find((b) => b.batchNo === 'SOON');
+    assert.equal(soon.quantity, 1);
+    await admin.delete(`/api/products/${productId}/batches/${soon.id}`);
+    await admin.post(`/api/orders/${order.id}/return`);
+    const after = (await admin.get(`/api/products/${productId}`)).body;
+    const recreated = after.batches.find((b) => b.batchNo === 'SOON');
+    assert.equal(recreated.quantity, 2);
+    assert.equal(recreated.expiryDate, day(30));
+  });
+
+  test('تعديل وحذف الدفعات (جرد) وتعديل الدواء لا يغيّر الكمية', async () => {
+    const p = (await admin.get(`/api/products/${productId}`)).body;
+    const expired = p.batches.find((b) => b.batchNo === 'EXPIRED');
+    const del = await admin.delete(`/api/products/${productId}/batches/${expired.id}`);
+    assert.equal(del.body.expiredStock, 0);
+    const late = del.body.batches.find((b) => b.batchNo === 'LATE');
+    const patched = await admin.patch(`/api/products/${productId}/batches/${late.id}`).send({ batchNo: 'LATE-2', expiryDate: '' });
+    assert.equal(patched.status, 200);
+    const l2 = patched.body.batches.find((b) => b.batchNo === 'LATE-2');
+    assert.equal(l2.expiryDate, null, 'الحقل الفارغ = بلا تاريخ');
+    assert.equal(l2.quantity, 5);
+    const put = await admin.put(`/api/products/${productId}`).field('name', 'أوميبرازول 20').field('type', 'حبوب').field('price', '1200').field('stock', '999');
+    assert.equal(put.body.stock, patched.body.stock, 'PUT لا يغيّر المخزون');
+    assert.equal(put.body.name, 'أوميبرازول 20');
+  });
+
+  test('الكاشير لا يعدّل الدفعات', async () => {
+    const cashier = await login('cashier1', 'final-pass-1');
+    assert.equal((await cashier.post(`/api/products/${productId}/batches`).send({ quantity: 1 })).status, 403);
   });
 });
 
@@ -273,6 +367,9 @@ describe('النسخ الاحتياطي والاستعادة', () => {
     const backup = (await admin.get('/api/backup')).body;
     assert.equal(backup.format, 'dijla-backup');
     assert.match(backup.products.find((p) => p.id === 2).image, /^data:image\/png;base64,/);
+    assert.equal(backup.version, 3);
+    assert.deepEqual(backup.products.find((p) => p.id === 2).batches, [{ batchNo: '', expiryDate: null, quantity: 15 }],
+      'كمية النسخة القديمة أصبحت دفعة غير محددة');
     const res = await admin.post('/api/restore').send(backup);
     assert.equal(res.status, 200);
     const again = (await admin.get('/api/orders')).body;

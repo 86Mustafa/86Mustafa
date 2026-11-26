@@ -5,6 +5,7 @@ const { notFound, conflict, badRequest } = require('../errors');
 const { orderSchema, idParam } = require('../validation');
 const { PERMISSIONS: P } = require('../permissions');
 const { localDate } = require('../dates');
+const { availableStock, allocateFefo, restock } = require('../inventory');
 
 /** يحوّل صفوف قاعدة البيانات إلى الشكل الذي تستخدمه الواجهة. */
 function loadOrders(db, whereSql = '', params = []) {
@@ -18,10 +19,21 @@ function loadOrders(db, whereSql = '', params = []) {
     SELECT * FROM order_items
     WHERE order_id IN (${orders.map(() => '?').join(',')})
     ORDER BY id`).all(...orders.map((o) => o.id));
+  // الدفعات التي صُرف منها كل صنف (للطلبات المجهزة)
+  const allocations = items.length === 0 ? [] : db.prepare(`
+    SELECT order_item_id, batch_no, expiry_date, quantity FROM order_item_batches
+    WHERE order_item_id IN (${items.map(() => '?').join(',')})
+    ORDER BY id`).all(...items.map((it) => it.id));
+  const byItem = new Map();
+  for (const a of allocations) {
+    if (!byItem.has(a.order_item_id)) byItem.set(a.order_item_id, []);
+    byItem.get(a.order_item_id).push({ batchNo: a.batch_no, expiryDate: a.expiry_date, quantity: a.quantity });
+  }
   const byOrder = new Map(orders.map((o) => [o.id, []]));
   for (const it of items) {
     byOrder.get(it.order_id).push({
       id: it.product_id, name: it.name, type: it.type, price: it.price, quantity: it.quantity,
+      batches: byItem.get(it.id) || [],
     });
   }
   return orders.map((o) => ({
@@ -43,7 +55,8 @@ module.exports = function orderRoutes({ db, auth, config }) {
 
   const getOrder = (id) => loadOrders(db, 'WHERE o.id = ?', [id])[0];
   const getStatus = db.prepare('SELECT status FROM orders WHERE id = ?');
-  const getProduct = db.prepare('SELECT id, name, type, price, stock FROM products WHERE id = ?');
+  const getProduct = db.prepare('SELECT id, name, type, price FROM products WHERE id = ?');
+  const today = () => localDate(config.timeZone);
 
   router.get('/', (req, res) => {
     res.json(loadOrders(db));
@@ -72,8 +85,9 @@ module.exports = function orderRoutes({ db, auth, config }) {
       for (const [productId, quantity] of quantities) {
         const product = getProduct.get(productId);
         if (!product) throw badRequest(`الصنف رقم ${productId} غير موجود (ربما حُذف)، حدّث السلة`);
-        if (product.stock < quantity) {
-          throw conflict(`الكمية المتاحة من ${product.name}: ${product.stock} فقط`);
+        const stock = availableStock(db, productId, today()); // بدون الدفعات المنتهية
+        if (stock < quantity) {
+          throw conflict(`الكمية المتاحة (غير المنتهية) من ${product.name}: ${stock} فقط`);
         }
         lines.push({ product, quantity });
       }
@@ -93,39 +107,59 @@ module.exports = function orderRoutes({ db, auth, config }) {
     res.status(201).json(getOrder(create()));
   });
 
-  /** تم التجهيز: يخصم المخزون ويغيّر الحالة في معاملة واحدة (إما ينجح كله أو لا شيء). */
+  /**
+   * تم التجهيز: يصرف من الدفعات حسب الأقرب انتهاءً (FEFO) ويسجّل من أي دفعة خرج كل صنف،
+   * ويغيّر الحالة، في معاملة واحدة (إما ينجح كله أو لا شيء).
+   */
   router.post('/:id/complete', auth.requirePermission(P.ORDERS_MANAGE), (req, res) => {
     const id = idParam.parse(req.params.id);
     db.transaction(() => {
       const row = getStatus.get(id);
       if (!row) throw notFound('الطلب غير موجود');
       if (row.status !== 'pending') throw conflict('يمكن تجهيز الطلبات المعلقة فقط');
-      const items = db.prepare('SELECT product_id, name, quantity FROM order_items WHERE order_id = ?').all(id);
+      const items = db.prepare('SELECT id, product_id, name, quantity FROM order_items WHERE order_id = ?').all(id);
+      const record = db.prepare(`INSERT INTO order_item_batches (order_item_id, batch_id, batch_no, expiry_date, quantity)
+                                 VALUES (?, ?, ?, ?, ?)`);
       for (const it of items) {
-        const product = it.product_id == null ? null : getProduct.get(it.product_id);
-        if (!product) throw conflict(`الصنف ${it.name} لم يعد موجوداً في المخزون`);
-        if (product.stock < it.quantity) throw conflict(`الكمية غير كافية من ${it.name} (المتاح: ${product.stock})`);
+        if (it.product_id == null || !getProduct.get(it.product_id)) {
+          throw conflict(`الصنف ${it.name} لم يعد موجوداً في المخزون`);
+        }
+        let allocations;
+        try {
+          allocations = allocateFefo(db, it.product_id, it.quantity, today());
+        } catch (err) {
+          if (err.message !== 'INSUFFICIENT_STOCK') throw err;
+          throw conflict(`الكمية غير المنتهية غير كافية من ${it.name} (المتاح: ${err.available})`);
+        }
+        for (const a of allocations) record.run(it.id, a.batchId, a.batchNo, a.expiryDate, a.quantity);
       }
-      const dec = db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?');
-      for (const it of items) dec.run(it.quantity, it.product_id);
-      db.prepare(`UPDATE orders SET status = 'completed', completed_date = ? WHERE id = ?`)
-        .run(localDate(config.timeZone), id);
+      db.prepare(`UPDATE orders SET status = 'completed', completed_date = ? WHERE id = ?`).run(today(), id);
     })();
     res.json(getOrder(id));
   });
 
-  /** استرجاع طلب مكتمل: يعيد الكميات إلى المخزون. */
+  /** استرجاع طلب مكتمل: يعيد الكميات إلى نفس الدفعات التي صُرفت منها. */
   router.post('/:id/return', auth.requirePermission(P.ORDERS_MANAGE), (req, res) => {
     const id = idParam.parse(req.params.id);
     db.transaction(() => {
       const row = getStatus.get(id);
       if (!row) throw notFound('الطلب غير موجود');
       if (row.status !== 'completed') throw conflict('يمكن استرجاع الطلبات المكتملة فقط');
-      // الأصناف المحذوفة من قائمة الأدوية لا يمكن إعادتها (product_id = NULL) فتُتجاهل
-      db.prepare(`UPDATE products SET stock = stock + oi.quantity
-                  FROM order_items oi WHERE oi.order_id = ? AND oi.product_id = products.id`).run(id);
-      db.prepare(`UPDATE orders SET status = 'returned', returned_date = ? WHERE id = ?`)
-        .run(localDate(config.timeZone), id);
+      const items = db.prepare('SELECT id, product_id, quantity FROM order_items WHERE order_id = ?').all(id);
+      const allocationsOf = db.prepare('SELECT * FROM order_item_batches WHERE order_item_id = ?');
+      for (const it of items) {
+        // الأصناف المحذوفة من قائمة الأدوية لا يمكن إعادتها (product_id = NULL) فتُتجاهل
+        if (it.product_id == null || !getProduct.get(it.product_id)) continue;
+        const allocations = allocationsOf.all(it.id);
+        if (allocations.length === 0) {
+          // طلبات جُهزت قبل نظام الدفعات: تعود إلى دفعة "غير محددة"
+          restock(db, it.product_id, {}, it.quantity);
+        }
+        for (const a of allocations) {
+          restock(db, it.product_id, { batchId: a.batch_id, batchNo: a.batch_no, expiryDate: a.expiry_date }, a.quantity);
+        }
+      }
+      db.prepare(`UPDATE orders SET status = 'returned', returned_date = ? WHERE id = ?`).run(today(), id);
     })();
     res.json(getOrder(id));
   });
