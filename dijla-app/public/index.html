@@ -400,6 +400,22 @@
     .icon.pending { background: linear-gradient(45deg,#f39c12,#e67e22); }
     .icon.low { background: linear-gradient(45deg,#e74c3c,#c0392b); }
     .icon.sales { background: linear-gradient(45deg,#2ecc71,#27ae60); }
+    .icon.expiry { background: linear-gradient(45deg,#8e44ad,#6c3483); }
+
+    /* ===== الدفعات وتواريخ الانتهاء ===== */
+    .expiry-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; white-space: nowrap; }
+    .expiry-ok { background: #e8f6ef; color: #1e8449; }
+    .expiry-soon { background: #fdebd0; color: #a04000; }
+    .expiry-expired { background: #fadbd8; color: #922b21; }
+    .expiry-none { background: #eee; color: #666; }
+    .card-stock { margin-top: 6px; font-size: 13px; color: #555; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .stat-sub { font-size: 12px; color: #888; }
+    .batches-table input.form-control { padding: 6px; min-width: 0; }
+    .batches-table td, .batches-table th { padding: 6px; }
+    .batch-expired-row td { background: #fdf2f2; }
+    .add-batch-row { display: grid; grid-template-columns: 1fr 1fr 90px auto; gap: 8px; align-items: end; margin-top: 10px; }
+    .add-batch-row label, .field-label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; }
+    .modal-panel { background: #fff; padding: 20px; border-radius: 8px; max-width: 680px; width: 100%; max-height: 92vh; overflow: auto; }
     
     .orders-tabs {
       display: flex;
@@ -535,7 +551,7 @@
       padding: 15px;
       border-radius: 5px;
       color: white;
-      z-index: 1000;
+      z-index: 3000; /* فوق شاشة الدخول والنوافذ */
       max-width: 400px;
     }
     
@@ -587,20 +603,98 @@
       margin-top: 20px;
     }
     
+    /* ===== تسجيل الدخول والمستخدمون ===== */
+    .auth-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: linear-gradient(135deg, var(--primary-color), #1d5f8c);
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    #password-modal { background: rgba(0,0,0,.55); }
+    .auth-card {
+      background: #fff; border-radius: 12px; padding: 28px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.25);
+    }
+    .auth-card h2 { color: var(--primary-color); margin-bottom: 6px; font-size: 20px; text-align: center; }
+    .auth-card label { display: block; margin-bottom: 4px; font-size: 14px; }
+    /* الشعار أبيض، فنضعه على خلفية بلون الهوية */
+    .auth-logo { display: block; width: 88px; height: 88px; margin: 0 auto 12px; object-fit: contain; background: var(--primary-color); border-radius: 50%; padding: 8px; }
+    .auth-subtitle { color: #666; margin-bottom: 18px; text-align: center; font-size: 14px; }
+    .auth-error { color: var(--danger-color); min-height: 22px; margin-bottom: 8px; font-size: 14px; }
+    .auth-submit { width: 100%; padding: 10px; font-size: 16px; }
+    .user-info { display: flex; align-items: center; gap: 8px; }
+    .user-info-text { text-align: left; line-height: 1.3; }
+    .user-info-name { font-weight: bold; }
+    .user-info-role { font-size: 12px; opacity: .85; }
+    .btn-light { background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+    .btn-light:hover { background: rgba(255,255,255,.3); }
+    .users-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 15px 0 8px; }
+    .users-hint { color: #666; font-size: 13px; margin-bottom: 15px; line-height: 1.8; }
+    .user-inactive td { opacity: .55; }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* ===== التنقل على الهاتف ===== */
+    .mobile-only, .menu-toggle, .bottom-nav { display: none; }
+    .drawer-tools { list-style: none; margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee; }
+    .drawer-tools a { display: block; padding: 10px; color: var(--text-color); text-decoration: none; border-radius: 4px; }
+    .drawer-tools a:hover { background: var(--accent-color); }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1400;
+      background: #fff; border-top: 1px solid #ddd; box-shadow: 0 -2px 10px rgba(0,0,0,.08);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .bottom-nav button {
+      flex: 1; position: relative; background: none; border: none; cursor: pointer;
+      padding: 8px 2px 6px; color: #667; font-size: 11px; font-family: inherit;
+      display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 56px;
+    }
+    .bottom-nav button i { font-size: 18px; }
+    .bottom-nav button.active { color: var(--primary-color); font-weight: bold; }
+    .nav-badge {
+      position: absolute; top: 4px; left: 50%; margin-left: 4px; min-width: 18px; height: 18px; padding: 0 5px;
+      border-radius: 9px; background: var(--danger-color); color: #fff; font-size: 11px; line-height: 18px;
+    }
+
     @media (max-width: 768px) {
       .main-content {
         grid-template-columns: 1fr;
       }
+
+      /* عناصر الشبكة لا تتقلص تحت عرض محتواها افتراضياً، فتتجاوز الصفحة عرض الهاتف.
+         نسمح لها بالتقلص، والجداول العريضة تُمرَّر أفقياً داخل البطاقة. */
+      .main-content > * {
+        min-width: 0;
+      }
+
+      .content {
+        overflow-x: auto;
+      }
       
+      /* القائمة الجانبية تصبح درجاً ينزلق من اليمين */
       .sidebar {
-        display: none;
+        position: fixed; top: 0; right: 0; bottom: 0; z-index: 1600;
+        width: 270px; max-width: 85vw; border-radius: 0; overflow-y: auto;
+        transform: translateX(100%); transition: transform .25s ease;
+        box-shadow: -4px 0 20px rgba(0,0,0,.2);
       }
-      
-      .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
+      .sidebar.open { transform: none; }
+      .drawer-backdrop:not([hidden]) {
+        position: fixed; inset: 0; z-index: 1550; background: rgba(0,0,0,.45);
       }
+      .mobile-only { display: block; }
+      .menu-toggle { display: inline-flex; align-items: center; gap: 6px; }
+
+      /* ترويسة مضغوطة */
+      header { padding: 8px 0; }
+      .header-content { flex-direction: row; gap: 8px; }
+      .header-title, .user-controls, .user-info-role { display: none; }
+      .header-actions { width: 100%; justify-content: space-between; gap: 8px !important; }
+      .header-logo img { height: 44px !important; }
+      .container { width: 100%; padding: 12px; }
+
+      /* شريط التنقل السفلي */
+      .bottom-nav { display: flex; }
+      body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+      .notification { left: 12px; right: 12px; top: 12px; }
       
       .card-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -642,19 +736,83 @@
 <body>
   <div class="notification" id="notification"></div>
 
+  <!-- شريط التنقل السفلي (الهاتف فقط) -->
+  <nav class="bottom-nav" aria-label="التنقل">
+    <button type="button" data-page="home" class="active"><i class="fas fa-home"></i><span>الرئيسية</span></button>
+    <button type="button" data-page="products"><i class="fas fa-pills"></i><span>الأدوية</span></button>
+    <button type="button" data-page="cart"><i class="fas fa-shopping-cart"></i><span>السلة</span><b id="cart-badge" class="nav-badge" hidden>0</b></button>
+    <button type="button" data-page="orders"><i class="fas fa-clipboard-list"></i><span>الطلبات</span></button>
+    <button type="button" id="bottom-more"><i class="fas fa-ellipsis-h"></i><span>المزيد</span></button>
+  </nav>
+
+  <!-- شاشة تسجيل الدخول -->
+  <div id="login-screen" class="auth-overlay" style="display:none">
+    <form id="login-form" class="auth-card" autocomplete="on">
+      <img src="images/dijla.png" alt="شعار شركة دجلة" class="auth-logo">
+      <h2>نظام مبيعات أدوية شركة دجلة</h2>
+      <p class="auth-subtitle">سجّل الدخول للمتابعة</p>
+      <div class="form-group">
+        <label for="login-username">اسم المستخدم</label>
+        <input id="login-username" class="form-control" autocomplete="username" required dir="ltr">
+      </div>
+      <div class="form-group">
+        <label for="login-password">كلمة المرور</label>
+        <input id="login-password" type="password" class="form-control" autocomplete="current-password" required dir="ltr">
+      </div>
+      <div id="login-error" class="auth-error" role="alert"></div>
+      <button id="login-submit" type="submit" class="btn btn-primary auth-submit">دخول</button>
+    </form>
+  </div>
+
+  <!-- تغيير كلمة المرور -->
+  <div id="password-modal" class="auth-overlay" style="display:none">
+    <form id="password-form" class="auth-card">
+      <h2>تغيير كلمة المرور</h2>
+      <p id="password-modal-note" class="auth-subtitle">كلمة المرور الحالية مؤقتة، يرجى اختيار كلمة مرور جديدة للمتابعة.</p>
+      <div class="form-group">
+        <label for="current-password">كلمة المرور الحالية</label>
+        <input id="current-password" type="password" class="form-control" autocomplete="current-password" required dir="ltr">
+      </div>
+      <div class="form-group">
+        <label for="new-password">كلمة المرور الجديدة (8 أحرف على الأقل)</label>
+        <input id="new-password" type="password" class="form-control" autocomplete="new-password" minlength="8" required dir="ltr">
+      </div>
+      <div class="form-group">
+        <label for="confirm-password">تأكيد كلمة المرور الجديدة</label>
+        <input id="confirm-password" type="password" class="form-control" autocomplete="new-password" minlength="8" required dir="ltr">
+      </div>
+      <div id="password-error" class="auth-error" role="alert"></div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-success auth-submit">حفظ</button>
+        <button type="button" id="cancel-password-change" class="btn btn-danger auth-submit">إلغاء</button>
+      </div>
+    </form>
+  </div>
+
   <header>
     <div class="container">
       <div class="header-content">
-        <div style="font-weight:700"> نظام مبيعات ادوية شركة دجلة/ الديوانية</div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="height:40px; display:flex; align-items:center; justify-content:center; 
+        <div class="header-title" style="font-weight:700"> نظام مبيعات ادوية شركة دجلة/ الديوانية</div>
+        <div class="header-actions" style="display:flex;align-items:center;gap:12px">
+          <button id="menu-toggle" class="btn btn-light menu-toggle" type="button" aria-label="القائمة" aria-controls="sidebar" aria-expanded="false">
+            <i class="fas fa-bars"></i> القائمة
+          </button>
+          <div class="header-logo" style="height:40px; display:flex; align-items:center; justify-content:center; 
                       border-radius:4px; font-weight:bold; font-size:16px;">
-            <img src="images\dijla.png" style="height:80px;object-fit:contain">
+            <img src="images/dijla.png" alt="شعار شركة دجلة" style="height:80px;object-fit:contain">
           </div>
           <div class="user-controls">
-            <button id="backup-data" class="btn btn-primary">نسخ احتياطي</button>
+            <button id="backup-data" class="btn btn-primary" data-perm="backup">نسخ احتياطي</button>
             <input type="file" id="restore-data" accept=".json" style="display:none">
-            <button id="restore-btn" class="btn btn-warning">استعادة بيانات</button>
+            <button id="restore-btn" class="btn btn-warning" data-perm="backup">استعادة بيانات</button>
+          </div>
+          <div class="user-info">
+            <div class="user-info-text">
+              <div id="current-user-name" class="user-info-name"></div>
+              <div id="current-user-role" class="user-info-role"></div>
+            </div>
+            <button id="change-password-btn" class="btn btn-light" title="تغيير كلمة المرور"><i class="fas fa-key"></i></button>
+            <button id="logout-btn" class="btn btn-light" title="تسجيل الخروج"><i class="fas fa-sign-out-alt"></i> خروج</button>
           </div>
         </div>
       </div>
@@ -663,19 +821,26 @@
 
   <div class="container">
     <div class="main-content">
-      <aside class="sidebar">
+      <aside class="sidebar" id="sidebar">
         <h3>القائمة</h3>
         <ul>
           <li><a href="#" class="sidebar-link active" data-page="home"><i class="fas fa-home"></i> الرئيسية</a></li>
           <li><a href="#" class="sidebar-link" data-page="products"><i class="fas fa-pills"></i> الأدوية</a></li>
-          <li><a href="#" class="sidebar-link" data-page="add-product"><i class="fas fa-plus-circle"></i> إضافة دواء</a></li>
+          <li><a href="#" class="sidebar-link" data-page="add-product" data-perm="products:write"><i class="fas fa-plus-circle"></i> إضافة دواء</a></li>
           <li><a href="#" class="sidebar-link" data-page="manage-medicines"><i class="fas fa-edit"></i> إدارة الأدوية</a></li>
           <li><a href="#" class="sidebar-link" data-page="cart"><i class="fas fa-shopping-cart"></i> سلة المشتريات</a></li>
           <li><a href="#" class="sidebar-link" data-page="orders"><i class="fas fa-clipboard-list"></i> الطلبات</a></li>
           <li><a href="#" class="sidebar-link" data-page="inventory"><i class="fas fa-boxes"></i> المخزون</a></li>
-          <li><a href="#" class="sidebar-link" data-page="reports"><i class="fas fa-chart-bar"></i> التقارير</a></li>
+          <li><a href="#" class="sidebar-link" data-page="reports" data-perm="reports"><i class="fas fa-chart-bar"></i> التقارير</a></li>
+          <li><a href="#" class="sidebar-link" data-page="users" data-perm="users"><i class="fas fa-users-cog"></i> المستخدمون</a></li>
+        </ul>
+        <!-- على الهاتف تُخفى أزرار الترويسة، فنضعها هنا -->
+        <ul class="mobile-only drawer-tools">
+          <li data-perm="backup"><a href="#" data-click="backup-data"><i class="fas fa-download"></i> نسخ احتياطي</a></li>
+          <li data-perm="backup"><a href="#" data-click="restore-btn"><i class="fas fa-upload"></i> استعادة بيانات</a></li>
         </ul>
       </aside>
+      <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
 
       <main class="content">
         <!-- الصفحة الرئيسية -->
@@ -701,6 +866,14 @@
               <div class="body">
                 <div class="title">أدوية منخفضة المخزون</div>
                 <div id="low-stock" class="value">0</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="icon expiry"><i class="fas fa-hourglass-half"></i></div>
+              <div class="body">
+                <div class="title">قريبة الانتهاء / منتهية</div>
+                <div class="value"><span id="near-expiry-count">0</span> / <span id="expired-count">0</span></div>
+                <div class="stat-sub">خلال <span class="expiry-days-label">90</span> يوماً</div>
               </div>
             </div>
             <div class="stat-card">
@@ -773,6 +946,16 @@
                 <input id="product-stock" class="form-control" placeholder="الكمية" type="number" min="0" required>
               </div>
             </div>
+            <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap">
+              <div class="form-group" style="flex:1;min-width:160px">
+                <label class="field-label" for="product-batch-no">رقم الدفعة (Lot / Batch)</label>
+                <input id="product-batch-no" class="form-control" maxlength="50" placeholder="اختياري" dir="ltr">
+              </div>
+              <div class="form-group" style="flex:1;min-width:160px">
+                <label class="field-label" for="product-expiry">تاريخ الانتهاء</label>
+                <input id="product-expiry" class="form-control" type="date">
+              </div>
+            </div>
             <div class="form-group">
               <input id="product-image" class="form-control" type="file" accept="image/*">
             </div>
@@ -791,7 +974,8 @@
                   <th>الاسم</th>
                   <th>النوع</th>
                   <th>السعر</th>
-                  <th>الكمية</th>
+                  <th>الكمية المتاحة</th>
+                  <th>أقرب انتهاء</th>
                   <th>إجراءات</th>
                 </tr>
               </thead>
@@ -801,7 +985,7 @@
 
           <!-- نافذة تعديل الدواء -->
           <div id="edit-medicine-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:1000">
-            <div style="background:#fff;padding:20px;border-radius:8px;max-width:500px;width:90%">
+            <div class="modal-panel">
               <h3>تعديل الدواء</h3>
               <div class="form-group">
                 <input id="edit-medicine-name" class="form-control" placeholder="اسم الدواء">
@@ -809,20 +993,34 @@
               <div class="form-group">
                 <input id="edit-medicine-type" class="form-control" placeholder="نوع الدواء">
               </div>
-              <div style="display:flex;gap:10px;margin-bottom:15px">
-                <div class="form-group" style="flex:1">
-                  <input id="edit-medicine-price" class="form-control" type="number" step="0.01" min="0" placeholder="السعر">
-                </div>
-                <div class="form-group" style="flex:1">
-                  <input id="edit-medicine-stock" class="form-control" type="number" min="0" placeholder="الكمية">
-                </div>
+              <div class="form-group">
+                <input id="edit-medicine-price" class="form-control" type="number" step="0.01" min="0" placeholder="السعر">
               </div>
               <div class="form-group">
                 <input id="edit-medicine-image" class="form-control" type="file" accept="image/*">
               </div>
               <div style="display:flex;gap:10px;margin-top:15px">
                 <button id="save-medicine-changes" class="btn btn-success">حفظ التغييرات</button>
-                <button id="cancel-edit-medicine" class="btn btn-danger">إلغاء</button>
+                <button id="cancel-edit-medicine" class="btn btn-danger">إغلاق</button>
+              </div>
+
+              <h3 style="margin-top:22px">الدفعات والكميات</h3>
+              <p class="stat-sub" style="margin-bottom:8px">
+                تعديلات الدفعات تُحفظ فوراً. عند التجهيز يُصرف من الدفعة الأقرب انتهاءً أولاً، والدفعات المنتهية لا تُباع.
+              </p>
+              <div style="overflow:auto">
+                <table class="batches-table">
+                  <thead>
+                    <tr><th>رقم الدفعة</th><th>تاريخ الانتهاء</th><th>الكمية</th><th>الحالة</th><th></th></tr>
+                  </thead>
+                  <tbody id="edit-batches-table"></tbody>
+                </table>
+              </div>
+              <div class="add-batch-row">
+                <div><label for="new-batch-no">رقم دفعة جديدة</label><input id="new-batch-no" class="form-control" maxlength="50" dir="ltr"></div>
+                <div><label for="new-batch-expiry">تاريخ الانتهاء</label><input id="new-batch-expiry" class="form-control" type="date"></div>
+                <div><label for="new-batch-qty">الكمية</label><input id="new-batch-qty" class="form-control" type="number" min="1"></div>
+                <button id="add-batch-btn" class="btn btn-primary" type="button">إضافة دفعة</button>
               </div>
             </div>
           </div>
@@ -855,7 +1053,7 @@
                   <input id="whatsapp-number" class="form-control" placeholder="رقم واتساب (مثال: 9647712345678)">
                 </div>
                 <div style="display:flex;gap:10px;margin-top:15px">
-                  <button id="create-invoice" class="btn btn-success">إنشاء فاتورة</button>
+                  <button id="create-invoice" class="btn btn-success" data-perm="orders:create">إنشاء فاتورة</button>
                   <button id="send-whatsapp" class="btn btn-primary">إرسال عبر واتساب</button>
                 </div>
               </div>
@@ -934,8 +1132,10 @@
                 <th>اسم الدواء</th>
                 <th>النوع</th>
                 <th>السعر</th>
-                <th>الكمية</th>
+                <th>الكمية المتاحة</th>
                 <th>حالة المخزون</th>
+                <th>أقرب انتهاء</th>
+                <th>كمية منتهية</th>
               </tr>
             </thead>
             <tbody id="inventory-table"></tbody>
@@ -977,6 +1177,10 @@
                 <label for="report-low-stock">الأدوية منخفضة المخزون</label>
               </div>
               <div class="report-type-option">
+                <input type="checkbox" id="report-expiry" checked>
+                <label for="report-expiry">الدفعات القريبة من الانتهاء والمنتهية</label>
+              </div>
+              <div class="report-type-option">
                 <input type="checkbox" id="report-total-products" checked>
                 <label for="report-total-products">إجمالي الأدوية المتوفرة</label>
               </div>
@@ -997,7 +1201,7 @@
               </div>
               <div class="form-group date-input">
                 <label for="report-end-date">إلى تاريخ</label>
-                <input type="date" id="report-end-date" class="form-control" value="${new Date().toISOString().split('T')[0]}">
+                <input type="date" id="report-end-date" class="form-control">
               </div>
               <div class="form-group">
                 <label>&nbsp;</label>
@@ -1013,6 +1217,42 @@
             </div>
           </div>
         </section>
+
+        <!-- صفحة المستخدمين (للمدير) -->
+        <section id="users" class="page">
+          <h2>المستخدمون</h2>
+          <form id="add-user-form" class="users-form">
+            <input id="new-user-username" class="form-control" placeholder="اسم المستخدم (بالإنجليزية)" required dir="ltr" pattern="[A-Za-z0-9_.\-]{3,32}" title="3-32 حرفاً إنجليزياً أو أرقاماً أو . _ -">
+            <input id="new-user-display" class="form-control" placeholder="الاسم الظاهر" required maxlength="60">
+            <select id="new-user-role" class="form-control" required>
+              <option value="cashier">مندوب / كاشير</option>
+              <option value="manager">مشرف</option>
+              <option value="admin">مدير النظام</option>
+            </select>
+            <input id="new-user-password" type="password" class="form-control" placeholder="كلمة مرور مؤقتة (8+)" minlength="8" required dir="ltr" autocomplete="new-password">
+            <button type="submit" class="btn btn-success">إضافة مستخدم</button>
+          </form>
+          <p class="users-hint">
+            <b>مندوب / كاشير:</b> عرض الأدوية وإنشاء الطلبات ·
+            <b>مشرف:</b> إضافة وتعديل الأدوية وتجهيز واسترجاع الطلبات والتقارير ·
+            <b>مدير النظام:</b> كل الصلاحيات مع حذف الأدوية والنسخ الاحتياطي وإدارة المستخدمين.
+            كلمة المرور التي تضعها مؤقتة ويُطلب من المستخدم تغييرها عند أول دخول.
+          </p>
+          <div style="overflow:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>اسم المستخدم</th>
+                  <th>الاسم</th>
+                  <th>الدور</th>
+                  <th>الحالة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="users-table"></tbody>
+            </table>
+          </div>
+        </section>
       </main>
     </div>
   </div>
@@ -1024,19 +1264,367 @@
     let cart = [];
     let orders = [];
     let currentEditingMedicineId = null;
-    
-    // نظام صلاحيات المستخدمين
-    const userRoles = {
-      admin: ['view', 'add', 'edit', 'delete', 'reports', 'backup'],
-      manager: ['view', 'add', 'edit', 'reports'],
-      cashier: ['view', 'add']
+
+    // حدود المخزون (مصدر واحد لكل الشاشات والتقارير والتنبيهات)
+    const LOW_STOCK_THRESHOLD = 10;      // أقل من هذا = منخفض
+    const CRITICAL_STOCK_THRESHOLD = 5;  // أقل من هذا = منخفض جداً
+    const isLowStock = p => Number(p.stock) < LOW_STOCK_THRESHOLD;
+
+    // ===== تواريخ الانتهاء =====
+    const EXPIRY_WARNING_DAYS = 90; // دفعة تنتهي خلال هذه المدة = قريبة الانتهاء
+
+    /** عدد الأيام من اليوم حتى تاريخ YYYY-MM-DD (سالب = منتهية). */
+    function daysUntil(dateStr) {
+      if (!dateStr) return null;
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const now = new Date();
+      return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
+    }
+
+    function expiryInfo(dateStr) {
+      const days = daysUntil(dateStr);
+      if (days === null) return { cls: 'expiry-none', label: 'بلا تاريخ', state: 'none', days };
+      if (days < 0) return { cls: 'expiry-expired', label: `منتهية ${dateStr}`, state: 'expired', days };
+      if (days <= EXPIRY_WARNING_DAYS) return { cls: 'expiry-soon', label: `${dateStr} (بعد ${days} يوم)`, state: 'soon', days };
+      return { cls: 'expiry-ok', label: dateStr, state: 'ok', days };
+    }
+
+    function expiryTag(dateStr) {
+      const info = expiryInfo(dateStr);
+      // التاريخ داخل <bdi> حتى لا ينقلب ترتيب أرقامه وسط النص العربي
+      const date = `<bdi dir="ltr">${escapeHtml(dateStr || '')}</bdi>`;
+      const html = info.state === 'none' ? 'بلا تاريخ'
+        : info.state === 'expired' ? `منتهية ${date}`
+        : info.state === 'soon' ? `${date} (بعد ${info.days} يوم)`
+        : date;
+      return `<span class="expiry-tag ${info.cls}">${html}</span>`;
+    }
+
+    /** كل الدفعات المنتهية والقريبة من الانتهاء، مرتبة حسب التاريخ. */
+    function getExpiryBatches() {
+      const list = [];
+      products.forEach(p => (p.batches || []).forEach(b => {
+        const info = expiryInfo(b.expiryDate);
+        if (info.state === 'expired' || info.state === 'soon') list.push({ product: p, batch: b, info });
+      }));
+      return list.sort((a, b) => a.info.days - b.info.days);
+    }
+
+    // صورة افتراضية محلية (تعمل بدون إنترنت، بديلاً عن via.placeholder.com المتوقفة)
+    const PLACEHOLDER_IMAGE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">' +
+      '<rect width="400" height="300" fill="#e8f4f8"/>' +
+      '<g transform="translate(200 135) rotate(-35)"><rect x="-70" y="-28" width="140" height="56" rx="28" fill="#7fcdbb"/>' +
+      '<path d="M0 -28 H42 A28 28 0 0 1 42 28 H0 Z" fill="#2c7fb8"/></g>' +
+      '<text x="200" y="250" font-family="Tahoma, sans-serif" font-size="26" fill="#2c7fb8" text-anchor="middle">دواء</text></svg>'
+    );
+
+    // حماية من XSS: يجب تمرير أي نص مصدره المستخدم أو البيانات المخزنة عبر هذه الدالة قبل وضعه في HTML
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[ch]));
+    }
+
+    // تاريخ اليوم بالتوقيت المحلي بصيغة YYYY-MM-DD
+    // (toISOString يعطي توقيت UTC فيسجّل تاريخ الأمس بين منتصف الليل والساعة 3 فجراً بتوقيت العراق)
+    function toLocalISODate(d) {
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+    function todayISO() {
+      return toLocalISODate(new Date());
+    }
+
+    function readStoredArray(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || '[]');
+        return Array.isArray(value) ? value : [];
+      } catch (e) {
+        console.error(`بيانات تالفة في ${key}`, e);
+        return [];
+      }
+    }
+
+    // توحيد شكل السجلات: الأرقام أرقام والنصوص نصوص
+    // (يحمي من بيانات قديمة أو ملف نسخة احتياطية معدَّل يدوياً)
+    const toNumber = v => (Number.isFinite(Number(v)) ? Number(v) : 0);
+    const toText = v => (v == null ? '' : String(v));
+
+    function normalizeItem(item) {
+      return {
+        ...item,
+        id: toNumber(item.id),
+        name: toText(item.name),
+        type: toText(item.type),
+        price: toNumber(item.price),
+        quantity: toNumber(item.quantity)
+      };
+    }
+
+    function normalizeProduct(p) {
+      return {
+        ...p,
+        id: toNumber(p.id),
+        name: toText(p.name),
+        type: toText(p.type),
+        price: toNumber(p.price),
+        stock: toNumber(p.stock),
+        image: toText(p.image)
+      };
+    }
+
+    function normalizeOrder(o) {
+      return {
+        ...o,
+        id: toNumber(o.id),
+        pharmacy: toText(o.pharmacy),
+        notes: toText(o.notes),
+        date: toText(o.date),
+        status: toText(o.status),
+        items: Array.isArray(o.items) ? o.items.filter(i => i && typeof i === 'object').map(normalizeItem) : []
+      };
+    }
+
+    const onlyObjects = arr => (Array.isArray(arr) ? arr.filter(x => x && typeof x === 'object') : []);
+
+
+    // ===== حالات الطلب (رموز ثابتة يرسلها الخادم) وأسماؤها المعروضة =====
+    const STATUS = { PENDING: 'pending', COMPLETED: 'completed', RETURNED: 'returned' };
+    const STATUS_LABELS = { pending: 'معلق', completed: 'مكتمل', returned: 'مسترجعة' };
+    const statusLabel = s => STATUS_LABELS[s] || s;
+
+    // ===== الصلاحيات: تُفرض على الخادم، وتُستخدم هنا فقط لإخفاء ما لا يحق للمستخدم =====
+    const PERM = {
+      PRODUCTS_WRITE: 'products:write',
+      PRODUCTS_DELETE: 'products:delete',
+      ORDERS_CREATE: 'orders:create',
+      ORDERS_MANAGE: 'orders:manage',
+      REPORTS: 'reports',
+      BACKUP: 'backup',
+      USERS: 'users'
     };
-    
-    let currentUser = {
-      name: 'مدير النظام',
-      role: 'admin'
-    };
-    
+
+    let currentUser = null;
+    let canManage = false; // صلاحية إدارة الطلبات، تُحدَّث عند رسم الجداول // يُملأ من /api/auth/me بعد الدخول
+
+    // ===== الاتصال بالخادم =====
+    class ApiError extends Error {
+      constructor(status, message, details) {
+        super(message);
+        this.status = status;
+        this.details = details;
+      }
+    }
+
+    /**
+     * طلب إلى الـ API. الجلسة في ملف تعريف httpOnly يرسله المتصفح تلقائياً.
+     * body: كائن (يُرسل JSON) أو FormData (للصور).
+     */
+    async function api(path, { method = 'GET', body } = {}) {
+      const opts = { method, credentials: 'same-origin', headers: {} };
+      if (body instanceof FormData) {
+        opts.body = body;
+      } else if (body !== undefined) {
+        opts.headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(body);
+      }
+      let res;
+      try {
+        res = await fetch('/api' + path, opts);
+      } catch (e) {
+        throw new ApiError(0, 'تعذّر الاتصال بالخادم، تأكد من تشغيله ومن الاتصال بالشبكة');
+      }
+      let data = null;
+      try { data = await res.json(); } catch (e) { /* رد بدون JSON */ }
+      if (!res.ok) {
+        const message = (data && data.error) || `خطأ من الخادم (${res.status})`;
+        if (res.status === 401 && !path.startsWith('/auth/login')) onSessionExpired(message);
+        throw new ApiError(res.status, message, data && data.details);
+      }
+      return data;
+    }
+
+    /** يعرض رسالة الخطأ للمستخدم (مع أول تفاصيل التحقق إن وُجدت). */
+    function showApiError(err, fallback = 'حدث خطأ') {
+      if (err && err.status === 401) return; // شاشة الدخول ظاهرة مسبقاً
+      const detail = err && err.details && err.details[0] ? `: ${err.details[0].message}` : '';
+      showNotification(((err && err.message) || fallback) + detail, 'error');
+      if (!(err instanceof ApiError)) console.error(err);
+    }
+
+    async function refreshData() {
+      const [p, o] = await Promise.all([api('/products'), api('/orders')]);
+      products = onlyObjects(p).map(normalizeProduct);
+      orders = onlyObjects(o).map(normalizeOrder);
+    }
+
+    function renderAll() {
+      updateStats();
+      loadProducts();
+      loadManageMedicines();
+      loadOrders();
+      updateCart();
+    }
+
+    async function refreshAndRender() {
+      try {
+        await refreshData();
+        renderAll();
+      } catch (err) {
+        showApiError(err, 'تعذّر تحميل البيانات');
+      }
+    }
+
+    function checkPermission(permission) {
+      return Boolean(currentUser && currentUser.permissions.includes(permission));
+    }
+
+    // ===== الجلسة وتسجيل الدخول =====
+    function showLoginScreen(message) {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('login-error').textContent = message || '';
+      document.getElementById('login-password').value = '';
+      setTimeout(() => document.getElementById('login-username').focus(), 0);
+    }
+
+    function onSessionExpired(message) {
+      if (!currentUser) return;
+      currentUser = null;
+      closePasswordModal();
+      showLoginScreen(message);
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-submit');
+      const errorBox = document.getElementById('login-error');
+      errorBox.textContent = '';
+      btn.disabled = true;
+      try {
+        const { user } = await api('/auth/login', {
+          method: 'POST',
+          body: {
+            username: document.getElementById('login-username').value.trim(),
+            password: document.getElementById('login-password').value
+          }
+        });
+        document.getElementById('login-password').value = '';
+        document.getElementById('login-screen').style.display = 'none';
+        await onLoggedIn(user);
+      } catch (err) {
+        errorBox.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function logout() {
+      try { await api('/auth/logout', { method: 'POST' }); } catch (e) { /* نخرج محلياً على أي حال */ }
+      currentUser = null;
+      products = [];
+      orders = [];
+      cart = [];
+      try { localStorage.removeItem('cart'); } catch (e) {}
+      renderAll();
+      showLoginScreen();
+    }
+
+    async function onLoggedIn(user) {
+      currentUser = user;
+      document.getElementById('current-user-name').textContent = user.displayName;
+      document.getElementById('current-user-role').textContent = user.roleLabel;
+      applyPermissions();
+      if (user.mustChangePassword) {
+        openPasswordModal(true);
+        return;
+      }
+      await refreshAndRender();
+      await offerLegacyMigration();
+      checkLowStockAlerts();
+    }
+
+    /** يُخفي عناصر الواجهة التي لا يملك المستخدم صلاحيتها (العنصر يحمل data-perm). */
+    function applyPermissions() {
+      document.querySelectorAll('[data-perm]').forEach(el => {
+        el.style.display = checkPermission(el.dataset.perm) ? '' : 'none';
+      });
+      const active = document.querySelector('.page.active');
+      const activeLink = active && document.querySelector(`.sidebar-link[data-page="${active.id}"]`);
+      if (activeLink && activeLink.style.display === 'none') {
+        document.querySelector('.sidebar-link[data-page="home"]').click();
+      }
+    }
+
+    // ===== تغيير كلمة المرور =====
+    function openPasswordModal(forced) {
+      const modal = document.getElementById('password-modal');
+      modal.dataset.forced = forced ? '1' : '';
+      document.getElementById('password-modal-note').style.display = forced ? 'block' : 'none';
+      document.getElementById('cancel-password-change').style.display = forced ? 'none' : '';
+      document.getElementById('password-form').reset();
+      document.getElementById('password-error').textContent = '';
+      modal.style.display = 'flex';
+      setTimeout(() => document.getElementById('current-password').focus(), 0);
+    }
+
+    function closePasswordModal() {
+      document.getElementById('password-modal').style.display = 'none';
+    }
+
+    async function handlePasswordChange(e) {
+      e.preventDefault();
+      const errorBox = document.getElementById('password-error');
+      const newPassword = document.getElementById('new-password').value;
+      if (newPassword !== document.getElementById('confirm-password').value) {
+        errorBox.textContent = 'كلمتا المرور غير متطابقتين';
+        return;
+      }
+      const forced = document.getElementById('password-modal').dataset.forced === '1';
+      try {
+        const { user } = await api('/auth/change-password', {
+          method: 'POST',
+          body: { currentPassword: document.getElementById('current-password').value, newPassword }
+        });
+        closePasswordModal();
+        showNotification('تم تغيير كلمة المرور بنجاح', 'success');
+        if (forced) await onLoggedIn(user);
+        else currentUser = user;
+      } catch (err) {
+        const detail = err.details && err.details[0] ? err.details[0].message : '';
+        errorBox.textContent = detail || err.message;
+      }
+    }
+
+    /**
+     * نقل بيانات النسخة السابقة: كانت الأدوية والطلبات محفوظة في المتصفح (localStorage).
+     * إذا وُجدت والخادم فارغ، نعرض على المدير نقلها إلى الخادم.
+     */
+    async function offerLegacyMigration() {
+      if (!checkPermission(PERM.BACKUP) || products.length > 0 || orders.length > 0) return;
+      const legacyProducts = readStoredArray('products');
+      const legacyOrders = readStoredArray('orders');
+      if (legacyProducts.length === 0 && legacyOrders.length === 0) return;
+      const ok = confirm(
+        `وُجدت بيانات من النسخة السابقة محفوظة في هذا المتصفح ` +
+        `(${legacyProducts.length} دواء و${legacyOrders.length} طلب).\n\nهل تريد نقلها إلى الخادم الآن؟`
+      );
+      if (!ok) return;
+      try {
+        const result = await api('/restore', { method: 'POST', body: { products: legacyProducts, orders: legacyOrders } });
+        // نحتفظ بنسخة باسم مختلف للاحتياط بدل حذفها نهائياً
+        try {
+          localStorage.setItem('legacy-backup', JSON.stringify({ products: legacyProducts, orders: legacyOrders, migratedAt: new Date().toISOString() }));
+          localStorage.removeItem('products');
+          localStorage.removeItem('orders');
+        } catch (e) {}
+        await refreshAndRender();
+        showNotification(`تم نقل ${result.products} دواء و${result.orders} طلب إلى الخادم`, 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر نقل البيانات');
+      }
+    }
+
     // safe localStorage setter (falls back to sessionStorage)
     function safeSave(key, valueObj) {
       try {
@@ -1056,78 +1644,173 @@
     }
 
     // تهيئة التطبيق
-    document.addEventListener('DOMContentLoaded', function() {
-      loadDataFromStorage();
+    document.addEventListener('DOMContentLoaded', async function() {
+      cart = onlyObjects(readStoredArray('cart')).map(normalizeItem);
       setupEventListeners();
-      initializeSampleData();
-      updateStats();
-      loadProducts();
-      loadOrders();
-      updateCart();
-      checkLowStockAlerts();
-      
+
       // تعيين التاريخ الافتراضي لبداية الشهر
       const startDate = new Date();
       startDate.setDate(1);
-      document.getElementById('report-start-date').value = startDate.toISOString().split('T')[0];
+      document.getElementById('report-start-date').value = toLocalISODate(startDate);
+      document.getElementById('report-end-date').value = todayISO();
+
+      try {
+        const { user } = await api('/auth/me');
+        await onLoggedIn(user);
+      } catch (err) {
+        showLoginScreen(err.status === 401 || err.status === 0 ? (err.status === 0 ? err.message : '') : err.message);
+      }
     });
 
-    function loadDataFromStorage() {
-      products = JSON.parse(localStorage.getItem('products') || '[]');
-      cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    // ===== إدارة المستخدمين (للمدير) =====
+    const ROLE_OPTIONS = { cashier: 'مندوب / كاشير', manager: 'مشرف', admin: 'مدير النظام' };
+    let usersCache = [];
+
+    async function loadUsers() {
+      if (!checkPermission(PERM.USERS)) return;
+      const table = document.getElementById('users-table');
+      try {
+        usersCache = await api('/users');
+      } catch (err) {
+        showApiError(err, 'تعذّر تحميل المستخدمين');
+        return;
+      }
+      table.innerHTML = usersCache.map(u => {
+        const isMe = currentUser && u.id === currentUser.id;
+        const roleSelect = `<select class="form-control user-role" data-id="${escapeHtml(u.id)}" ${isMe ? 'disabled' : ''} style="min-width:140px">
+            ${Object.entries(ROLE_OPTIONS).map(([value, label]) =>
+              `<option value="${value}" ${u.role === value ? 'selected' : ''}>${label}</option>`).join('')}
+          </select>`;
+        const status = !u.active ? '<span class="status-badge status-returned">معطّل</span>'
+          : u.mustChangePassword ? '<span class="status-badge status-pending">بانتظار تغيير كلمة المرور</span>'
+          : '<span class="status-badge status-completed">نشط</span>';
+        return `<tr class="${u.active ? '' : 'user-inactive'}">
+          <td dir="ltr" style="text-align:right">${escapeHtml(u.username)}${isMe ? ' (أنت)' : ''}</td>
+          <td>${escapeHtml(u.displayName)}</td>
+          <td>${roleSelect}</td>
+          <td>${status}</td>
+          <td>
+            <button class="btn btn-warning reset-user-password" data-id="${escapeHtml(u.id)}">كلمة مرور جديدة</button>
+            ${isMe ? '' : `<button class="btn ${u.active ? 'btn-danger' : 'btn-success'} toggle-user" data-id="${escapeHtml(u.id)}">${u.active ? 'تعطيل' : 'تفعيل'}</button>`}
+          </td>
+        </tr>`;
+      }).join('');
     }
 
-    function initializeSampleData() {
-      if (products.length === 0) {
-        const sampleProducts = [
-          { id: 1, name: 'باراسيتامول', type: 'حبوب', price: 2500, stock: 50, image: 'https://via.placeholder.com/400x300?text=باراسيتامول' },
-          { id: 2, name: 'أموكسيسيلين', type: 'حبوب', price: 5000, stock: 30, image: 'https://via.placeholder.com/400x300?text=أموكسيسيلين' },
-          { id: 3, name: 'فيتامين سي', type: 'حبوب', price: 3000, stock: 20, image: 'https://via.placeholder.com/400x300?text=فيتامين+سي' },
-          { id: 4, name: 'مرهم مضاد حيوي', type: 'مرهم', price: 7500, stock: 15, image: 'https://via.placeholder.com/400x300?text=مرهم' }
-        ];
-        products = sampleProducts;
-        localStorage.setItem('products', JSON.stringify(products));
+    async function updateUser(id, changes, successMessage) {
+      try {
+        await api(`/users/${id}`, { method: 'PATCH', body: changes });
+        showNotification(successMessage, 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر تحديث المستخدم');
       }
-      
-      // إضافة بيانات تجريبية للطلبات إذا لم تكن موجودة
-      if (orders.length === 0) {
-        const sampleOrders = [
-          {
-            id: 1,
-            pharmacy: 'صيدلية الحياة',
-            notes: 'تجهيز سريع',
-            items: [
-              { id: 1, name: 'باراسيتامول', type: 'حبوب', price: 2500, quantity: 2 },
-              { id: 3, name: 'فيتامين سي', type: 'حبوب', price: 3000, quantity: 1 }
-            ],
-            date: new Date().toISOString().split('T')[0],
-            status: 'مكتمل'
-          },
-          {
-            id: 2,
-            pharmacy: 'صيدلية النور',
-            notes: '',
-            items: [
-              { id: 2, name: 'أموكسيسيلين', type: 'حبوب', price: 5000, quantity: 3 }
-            ],
-            date: new Date().toISOString().split('T')[0],
-            status: 'معلق'
+      await loadUsers();
+    }
+
+    async function addUser(e) {
+      e.preventDefault();
+      const form = e.target;
+      try {
+        await api('/users', {
+          method: 'POST',
+          body: {
+            username: document.getElementById('new-user-username').value.trim(),
+            displayName: document.getElementById('new-user-display').value.trim(),
+            role: document.getElementById('new-user-role').value,
+            password: document.getElementById('new-user-password').value
           }
-        ];
-        orders = sampleOrders;
-        localStorage.setItem('orders', JSON.stringify(orders));
+        });
+        form.reset();
+        showNotification('تمت إضافة المستخدم. أعطه اسم المستخدم وكلمة المرور المؤقتة.', 'success');
+        await loadUsers();
+      } catch (err) {
+        showApiError(err, 'تعذّر إضافة المستخدم');
+      }
+    }
+
+    function handleUsersTableClick(e) {
+      const btn = e.target.closest('button[data-id]');
+      if (!btn) return;
+      const id = parseInt(btn.dataset.id, 10);
+      const user = usersCache.find(u => u.id === id);
+      if (!user) return;
+      if (btn.classList.contains('toggle-user')) {
+        const msg = user.active ? `تعطيل المستخدم ${user.displayName}؟ سيتم إخراجه من النظام فوراً.` : `تفعيل المستخدم ${user.displayName}؟`;
+        if (confirm(msg)) updateUser(id, { active: !user.active }, user.active ? 'تم تعطيل المستخدم' : 'تم تفعيل المستخدم');
+      } else if (btn.classList.contains('reset-user-password')) {
+        const password = prompt(`كلمة مرور مؤقتة جديدة للمستخدم ${user.displayName} (8 أحرف على الأقل):`);
+        if (password === null) return;
+        if (password.length < 8) {
+          showNotification('كلمة المرور يجب أن تكون 8 أحرف على الأقل', 'error');
+          return;
+        }
+        updateUser(id, { password }, 'تم تعيين كلمة المرور المؤقتة؛ سيُطلب من المستخدم تغييرها عند الدخول');
+      }
+    }
+
+    function handleUsersTableChange(e) {
+      const select = e.target.closest('select.user-role');
+      if (!select) return;
+      const id = parseInt(select.dataset.id, 10);
+      const user = usersCache.find(u => u.id === id);
+      if (!user) return;
+      if (confirm(`تغيير دور ${user.displayName} إلى "${ROLE_OPTIONS[select.value]}"؟`)) {
+        updateUser(id, { role: select.value }, 'تم تغيير الدور');
+      } else {
+        select.value = user.role;
       }
     }
 
     function setupEventListeners() {
+      // الدخول والجلسة
+      document.getElementById('login-form').addEventListener('submit', handleLogin);
+      document.getElementById('logout-btn').addEventListener('click', logout);
+      document.getElementById('change-password-btn').addEventListener('click', () => openPasswordModal(false));
+      document.getElementById('password-form').addEventListener('submit', handlePasswordChange);
+      document.getElementById('cancel-password-change').addEventListener('click', closePasswordModal);
+
+      // الدفعات في نافذة تعديل الدواء
+      document.getElementById('edit-batches-table').addEventListener('click', handleBatchTableClick);
+      document.getElementById('add-batch-btn').addEventListener('click', addBatch);
+
+      // المستخدمون
+      document.getElementById('add-user-form').addEventListener('submit', addUser);
+      document.getElementById('users-table').addEventListener('click', handleUsersTableClick);
+      document.getElementById('users-table').addEventListener('change', handleUsersTableChange);
+
       // القائمة الجانبية
       document.querySelectorAll('.sidebar-link').forEach(link => {
         link.addEventListener('click', function(e) {
           e.preventDefault();
           document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
           this.classList.add('active');
+          document.querySelectorAll('.bottom-nav button[data-page]').forEach(b => {
+            b.classList.toggle('active', b.dataset.page === this.dataset.page);
+          });
+          closeDrawer();
           showPage(this.dataset.page);
+          window.scrollTo(0, 0);
+        });
+      });
+
+      // التنقل على الهاتف: الشريط السفلي يستخدم نفس روابط القائمة، و"المزيد" يفتح الدرج
+      document.querySelector('.bottom-nav').addEventListener('click', function(e) {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        if (btn.id === 'bottom-more') return openDrawer();
+        const link = document.querySelector(`.sidebar-link[data-page="${btn.dataset.page}"]`);
+        if (link) link.click();
+      });
+      document.getElementById('menu-toggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.contains('open') ? closeDrawer() : openDrawer();
+      });
+      document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+      document.querySelectorAll('.drawer-tools a[data-click]').forEach(a => {
+        a.addEventListener('click', function(e) {
+          e.preventDefault();
+          closeDrawer();
+          document.getElementById(this.dataset.click).click();
         });
       });
 
@@ -1137,6 +1820,18 @@
           const tabId = this.dataset.tab;
           switchOrdersTab(tabId);
         });
+      });
+
+      // أزرار جداول الطلبات: مستمع واحد مفوَّض (event delegation) يُربط مرة واحدة فقط.
+      // سابقاً كانت كل دالة تحميل تربط مستمعاً على كل الأزرار في الصفحة، فيُنفَّذ "عرض" و"حذف" أكثر من مرة.
+      document.getElementById('orders').addEventListener('click', function(e) {
+        const btn = e.target.closest('button[data-id]');
+        if (!btn) return;
+        const orderId = parseInt(btn.dataset.id, 10);
+        if (btn.classList.contains('complete-order')) completeOrder(orderId);
+        else if (btn.classList.contains('return-order')) returnOrder(orderId);
+        else if (btn.classList.contains('view-order')) viewOrder(orderId);
+        else if (btn.classList.contains('delete-order')) deleteOrder(orderId);
       });
 
       // النماذج
@@ -1171,6 +1866,7 @@
         if (e.target.files.length > 0) {
           restoreData(e.target.files[0]);
         }
+        e.target.value = ''; // للسماح باختيار نفس الملف مرة أخرى
       });
       
       // نظام التقارير
@@ -1179,15 +1875,32 @@
       document.getElementById('export-report').addEventListener('click', exportReportToExcel);
     }
 
+    function openDrawer() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('drawer-backdrop').hidden = false;
+      document.getElementById('menu-toggle').setAttribute('aria-expanded', 'true');
+    }
+
+    function closeDrawer() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('drawer-backdrop').hidden = true;
+      document.getElementById('menu-toggle').setAttribute('aria-expanded', 'false');
+    }
+
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
       
       switch(pageId) {
-        case 'products': loadProducts(); break;
-        case 'manage-medicines': loadManageMedicines(); break;
-        case 'orders': loadOrders(); break;
-        case 'inventory': updateStats(); break;
+        // نجلب أحدث البيانات من الخادم عند فتح الصفحة (قد يكون مستخدم آخر غيّرها)
+        case 'home':
+        case 'products':
+        case 'manage-medicines':
+        case 'orders':
+        case 'inventory':
+          if (currentUser) refreshAndRender();
+          break;
+        case 'users': loadUsers(); break;
         case 'reports': 
           // لا نقوم بتحميل التقرير تلقائياً، ينتظر المستخدم
           break;
@@ -1202,10 +1915,6 @@
       document.getElementById(`${tabId}-orders-tab`).classList.add('active');
     }
 
-    // التحقق من الصلاحيات
-    function checkPermission(action) {
-      return userRoles[currentUser.role].includes(action);
-    }
 
     // التحقق من صحة البيانات المدخلة
     function validateProductData(product) {
@@ -1240,19 +1949,24 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-          <img class="card-img" src="${normalizeImageUrl(product.image)}" alt="${product.name}">
+          <img class="card-img" src="${escapeHtml(normalizeImageUrl(product.image))}" alt="${escapeHtml(product.name)}">
           <div class="card-body">
-            <div class="card-title">${product.name}</div>
+            <div class="card-title">${escapeHtml(product.name)}</div>
             <div class="card-meta">
-              <div class="card-price">${product.price} د.ع</div>
-              <div class="card-type badge">${product.type || '—'}</div>
+              <div class="card-price">${escapeHtml(product.price)} د.ع</div>
+              <div class="card-type badge">${escapeHtml(product.type || '—')}</div>
+            </div>
+            <div class="card-stock">
+              <span>المتاح: <b>${escapeHtml(product.stock)}</b></span>
+              ${product.nearestExpiry ? expiryTag(product.nearestExpiry) : ''}
+              ${product.expiredStock > 0 ? `<span class="expiry-tag expiry-expired">منتهي: ${escapeHtml(product.expiredStock)}</span>` : ''}
             </div>
             <div class="quantity-controls" style="margin-top:10px">
-              <button class="quantity-btn minus" data-id="${product.id}">-</button>
-              <input class="quantity-input" data-id="${product.id}" type="number" value="1" min="1">
-              <button class="quantity-btn plus" data-id="${product.id}">+</button>
+              <button class="quantity-btn minus" data-id="${escapeHtml(product.id)}">-</button>
+              <input class="quantity-input" data-id="${escapeHtml(product.id)}" type="number" value="1" min="1">
+              <button class="quantity-btn plus" data-id="${escapeHtml(product.id)}">+</button>
             </div>
-            <button class="btn btn-primary add-to-cart" data-id="${product.id}" style="width:100%;margin-top:8px">إضافة إلى السلة</button>
+            <button class="btn btn-primary add-to-cart" data-id="${escapeHtml(product.id)}" style="width:100%;margin-top:8px">إضافة إلى السلة</button>
           </div>
         `;
         grid.appendChild(card);
@@ -1290,60 +2004,82 @@
       });
     }
 
-    function addNewProduct() {
+    // يحوّل dataURL (ناتج ضغط الصورة) إلى Blob لرفعه للخادم
+    function dataUrlToBlob(dataUrl) {
+      const [header, base64] = dataUrl.split(',');
+      const mime = (header.match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
+      const bin = atob(base64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new Blob([bytes], { type: mime });
+    }
+
+    // يبني بيانات الدواء للإرسال، مع ضغط الصورة قبل الرفع (أقصى 1200px)
+    async function buildProductForm(name, type, price, stock, imageFile, firstBatch) {
+      const form = new FormData();
+      form.append('name', name);
+      form.append('type', type);
+      form.append('price', String(price));
+      form.append('stock', String(stock));
+      if (firstBatch) {
+        form.append('batchNo', firstBatch.batchNo);
+        form.append('expiryDate', firstBatch.expiryDate);
+      }
+      if (imageFile) {
+        let blob = imageFile;
+        try {
+          const dataUrl = await compressImage(imageFile, 1200, 1200, 0.75);
+          if (dataUrl) blob = dataUrlToBlob(dataUrl);
+        } catch (e) {
+          console.warn('تعذّر ضغط الصورة، سيتم رفع الأصل', e);
+        }
+        form.append('image', blob, 'image.jpg');
+      }
+      return form;
+    }
+
+    async function addNewProduct() {
       const name = document.getElementById('product-name').value.trim();
       const type = document.getElementById('product-type').value;
       const price = parseFloat(document.getElementById('product-price').value) || 0;
       const stock = parseInt(document.getElementById('product-stock').value) || 0;
       const imageInput = document.getElementById('product-image');
 
-      // التحقق من الصلاحيات
-      if (!checkPermission('add')) {
+      if (!checkPermission(PERM.PRODUCTS_WRITE)) {
         showNotification('ليس لديك صلاحية لإضافة منتجات', 'error');
         return;
       }
 
-      // التحقق من صحة البيانات
+      // تحقق سريع في المتصفح (الخادم يتحقق مرة أخرى)
       const validationErrors = validateProductData({ name, price, stock });
       if (validationErrors.length > 0) {
         validationErrors.forEach(error => showNotification(error, 'error'));
         return;
       }
-
       if (!name || !type || price <= 0 || stock < 0) {
         showNotification('يرجى ملء جميع الحقول بشكل صحيح', 'error');
         return;
       }
 
-      let imageUrl = 'https://via.placeholder.com/400x300?text=دواء';
-
-      if (imageInput && imageInput.files && imageInput.files[0]) {
-        // compress before saving (max 1200x1200, quality 0.75)
-        compressImage(imageInput.files[0], 1200, 1200, 0.75)
-          .then(dataUrl => saveProduct(name, type, price, stock, dataUrl || imageUrl))
-          .catch(() => {
-            // fallback to reading original if compression fails
-            const reader = new FileReader();
-            reader.onload = e => saveProduct(name, type, price, stock, e.target.result);
-            reader.readAsDataURL(imageInput.files[0]);
-          });
-      } else {
-        saveProduct(name, type, price, stock, imageUrl);
+      const submitBtn = document.querySelector('#add-product-form button[type="submit"]');
+      submitBtn.disabled = true;
+      try {
+        const file = imageInput && imageInput.files && imageInput.files[0];
+        const firstBatch = {
+          batchNo: document.getElementById('product-batch-no').value.trim(),
+          expiryDate: document.getElementById('product-expiry').value
+        };
+        if (!confirmPastExpiry(firstBatch.expiryDate)) return;
+        const form = await buildProductForm(name, type, price, stock, file, firstBatch);
+        await api('/products', { method: 'POST', body: form });
+        document.getElementById('add-product-form').reset();
+        await refreshAndRender();
+        showNotification('تم إضافة الدواء بنجاح', 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر إضافة الدواء');
+      } finally {
+        submitBtn.disabled = false;
       }
-    }
-
-    function saveProduct(name, type, price, stock, image) {
-      const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-      const newProduct = { id: newId, name, type, price, stock, image };
-      
-      products.push(newProduct);
-      localStorage.setItem('products', JSON.stringify(products));
-      
-      document.getElementById('add-product-form').reset();
-      loadProducts();
-      loadManageMedicines();
-      updateStats();
-      showNotification('تم إضافة الدواء بنجاح', 'success');
     }
 
     // إدارة السلة
@@ -1386,6 +2122,11 @@
       const container = document.getElementById('cart-items');
       container.innerHTML = '';
 
+      // عدّاد السلة في شريط الهاتف
+      const badge = document.getElementById('cart-badge');
+      badge.textContent = cart.length;
+      badge.hidden = cart.length === 0;
+
       if (cart.length === 0) {
         container.innerHTML = '<p style="text-align:center;padding:40px;color:#666">السلة فارغة</p>';
         document.getElementById('cart-subtotal').textContent = '0.00';
@@ -1405,21 +2146,21 @@
         cartItem.className = 'cart-item';
         cartItem.innerHTML = `
           <div class="cart-item-info">
-            <img class="cart-item-img" src="${normalizeImageUrl(productRef.image)}" alt="${item.name}">
+            <img class="cart-item-img" src="${escapeHtml(normalizeImageUrl(productRef.image))}" alt="${escapeHtml(item.name)}">
             <div>
-              <h4>${item.name}</h4>
-              <div>${item.type}</div>
-              <div class="cart-item-price">${itemPrice} د.ع</div>
+              <h4>${escapeHtml(item.name)}</h4>
+              <div>${escapeHtml(item.type)}</div>
+              <div class="cart-item-price">${escapeHtml(itemPrice)} د.ع</div>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:15px">
             <div style="display:flex;align-items:center;gap:10px">
-              <button class="quantity-btn minus-cart" data-id="${item.id}">-</button>
-              <input class="cart-quantity" data-id="${item.id}" type="number" value="${item.quantity}" min="1" style="width:60px">
-              <button class="quantity-btn plus-cart" data-id="${item.id}">+</button>
+              <button class="quantity-btn minus-cart" data-id="${escapeHtml(item.id)}">-</button>
+              <input class="cart-quantity" data-id="${escapeHtml(item.id)}" type="number" value="${escapeHtml(item.quantity)}" min="1" style="width:60px">
+              <button class="quantity-btn plus-cart" data-id="${escapeHtml(item.id)}">+</button>
             </div>
             <div style="font-weight:bold">${itemTotal.toFixed(2)} د.ع</div>
-            <button class="btn btn-danger remove-from-cart" data-id="${item.id}">حذف</button>
+            <button class="btn btn-danger remove-from-cart" data-id="${escapeHtml(item.id)}">حذف</button>
           </div>
         `;
         container.appendChild(cartItem);
@@ -1449,7 +2190,7 @@
           
           if (item && product && item.quantity < product.stock) {
             item.quantity++;
-            localStorage.setItem('cart', JSON.stringify(cart));
+            safeSave('cart', cart);
             updateCart();
           } else {
             showNotification('لا توجد كمية كافية في المخزون', 'error');
@@ -1464,7 +2205,7 @@
           
           if (item && item.quantity > 1) {
             item.quantity--;
-            localStorage.setItem('cart', JSON.stringify(cart));
+            safeSave('cart', cart);
             updateCart();
           }
         });
@@ -1480,7 +2221,7 @@
           if (item && product) {
             if (newQuantity <= product.stock) {
               item.quantity = newQuantity;
-              localStorage.setItem('cart', JSON.stringify(cart));
+              safeSave('cart', cart);
               updateCart();
             } else {
               showNotification('تجاوزت الكمية المتاحة في المخزون', 'error');
@@ -1493,53 +2234,59 @@
 
     function removeFromCart(productId) {
       cart = cart.filter(item => item.id !== productId);
-      localStorage.setItem('cart', JSON.stringify(cart));
+      safeSave('cart', cart);
       updateCart();
       showNotification('تم حذف المنتج من السلة', 'success');
     }
 
     // إدارة الطلبات
-    function createInvoice() {
+    async function createInvoice() {
       const pharmacy = document.getElementById('pharmacy-name').value.trim();
       const notes = document.getElementById('order-notes').value.trim();
-      
+
+      if (!checkPermission(PERM.ORDERS_CREATE)) {
+        showNotification('ليس لديك صلاحية لإنشاء الطلبات', 'error');
+        return;
+      }
       if (!pharmacy) {
         showNotification('يرجى إدخال اسم الصيدلية', 'error');
         return;
       }
-      
       if (cart.length === 0) {
         showNotification('السلة فارغة', 'error');
         return;
       }
-      
-      const newOrder = {
-        id: orders.length > 0 ? Math.max(...orders.map(o => o.id)) + 1 : 1,
-        pharmacy: pharmacy,
-        notes: notes,
-        items: [...cart],
-        date: new Date().toISOString().split('T')[0],
-        status: 'معلق'
-      };
-      
-      orders.push(newOrder);
-      localStorage.setItem('orders', JSON.stringify(orders));
-      
-      cart = [];
-      localStorage.setItem('cart', JSON.stringify(cart));
-      updateCart();
-      
-      document.getElementById('pharmacy-name').value = '';
-      document.getElementById('order-notes').value = '';
-      document.getElementById('whatsapp-number').value = '';
-      
-      showNotification('تم إنشاء الفاتورة بنجاح', 'success');
-      printInvoice(newOrder);
-      loadOrders();
-      updateStats();
+
+      // نفتح نافذة الفاتورة الآن (أثناء ضغطة الزر) حتى لا يحجبها المتصفح بعد انتظار رد الخادم
+      const invoiceWindow = window.open('', '_blank', 'width=800,height=600');
+      const btn = document.getElementById('create-invoice');
+      btn.disabled = true;
+      try {
+        // نرسل المعرّف والكمية فقط؛ الخادم يأخذ الأسعار من قاعدة البيانات ويحسب الإجمالي
+        const order = await api('/orders', {
+          method: 'POST',
+          body: { pharmacy, notes, items: cart.map(item => ({ productId: item.id, quantity: item.quantity })) }
+        });
+
+        cart = [];
+        safeSave('cart', cart);
+        document.getElementById('pharmacy-name').value = '';
+        document.getElementById('order-notes').value = '';
+        document.getElementById('whatsapp-number').value = '';
+
+        showNotification('تم إنشاء الفاتورة بنجاح', 'success');
+        printInvoice(order, invoiceWindow);
+        await refreshAndRender();
+      } catch (err) {
+        if (invoiceWindow) invoiceWindow.close();
+        showApiError(err, 'تعذّر إنشاء الفاتورة');
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     function loadOrders() {
+      canManage = checkPermission(PERM.ORDERS_MANAGE);
       loadPendingOrders();
       loadCompletedOrders();
       loadReturnedOrders();
@@ -1547,7 +2294,7 @@
 
     function loadPendingOrders() {
       const table = document.getElementById('pending-orders-table');
-      const pendingOrders = orders.filter(order => order.status === 'معلق');
+      const pendingOrders = orders.filter(order => order.status === STATUS.PENDING);
       
       table.innerHTML = '';
       
@@ -1560,42 +2307,24 @@
         const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.pharmacy}</td>
-          <td>${order.date}</td>
+          <td>${escapeHtml(order.id)}</td>
+          <td>${escapeHtml(order.pharmacy)}</td>
+          <td>${escapeHtml(order.date)}</td>
           <td>${total.toFixed(2)} د.ع</td>
           <td><span class="status-badge status-pending">معلق</span></td>
           <td>
-            <button class="btn btn-success complete-order" data-id="${order.id}">تم التجهيز</button>
-            <button class="btn btn-primary view-order" data-id="${order.id}">عرض</button>
-            <button class="btn btn-danger delete-order" data-id="${order.id}">حذف</button>
+            ${canManage ? `<button class="btn btn-success complete-order" data-id="${escapeHtml(order.id)}">تم التجهيز</button>` : ''}
+            <button class="btn btn-primary view-order" data-id="${escapeHtml(order.id)}">عرض</button>
+            ${canManage ? `<button class="btn btn-danger delete-order" data-id="${escapeHtml(order.id)}">حذف</button>` : ''}
           </td>
         `;
         table.appendChild(row);
-      });
-      
-      document.querySelectorAll('.complete-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          completeOrder(parseInt(this.dataset.id));
-        });
-      });
-      
-      document.querySelectorAll('.view-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          viewOrder(parseInt(this.dataset.id));
-        });
-      });
-      
-      document.querySelectorAll('.delete-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          deleteOrder(parseInt(this.dataset.id));
-        });
       });
     }
 
     function loadCompletedOrders() {
       const table = document.getElementById('completed-orders-table');
-      const completedOrders = orders.filter(order => order.status === 'مكتمل');
+      const completedOrders = orders.filter(order => order.status === STATUS.COMPLETED);
       
       table.innerHTML = '';
       
@@ -1608,35 +2337,23 @@
         const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.pharmacy}</td>
-          <td>${order.date}</td>
+          <td>${escapeHtml(order.id)}</td>
+          <td>${escapeHtml(order.pharmacy)}</td>
+          <td>${escapeHtml(order.date)}</td>
           <td>${total.toFixed(2)} د.ع</td>
           <td><span class="status-badge status-completed">مكتمل</span></td>
           <td>
-            <button class="btn btn-warning return-order" data-id="${order.id}">استرجاع</button>
-            <button class="btn btn-primary view-order" data-id="${order.id}">عرض</button>
+            ${canManage ? `<button class="btn btn-warning return-order" data-id="${escapeHtml(order.id)}">استرجاع</button>` : ''}
+            <button class="btn btn-primary view-order" data-id="${escapeHtml(order.id)}">عرض</button>
           </td>
         `;
         table.appendChild(row);
-      });
-      
-      document.querySelectorAll('.return-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          returnOrder(parseInt(this.dataset.id));
-        });
-      });
-      
-      document.querySelectorAll('.view-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          viewOrder(parseInt(this.dataset.id));
-        });
       });
     }
 
     function loadReturnedOrders() {
       const table = document.getElementById('returned-orders-table');
-      const returnedOrders = orders.filter(order => order.status === 'مسترجعة');
+      const returnedOrders = orders.filter(order => order.status === STATUS.RETURNED);
       
       table.innerHTML = '';
       
@@ -1649,105 +2366,55 @@
         const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.pharmacy}</td>
-          <td>${order.date}</td>
+          <td>${escapeHtml(order.id)}</td>
+          <td>${escapeHtml(order.pharmacy)}</td>
+          <td>${escapeHtml(order.date)}</td>
           <td>${total.toFixed(2)} د.ع</td>
           <td><span class="status-badge status-returned">مسترجعة</span></td>
           <td>
-            <button class="btn btn-primary view-order" data-id="${order.id}">عرض</button>
-            <button class="btn btn-danger delete-order" data-id="${order.id}">حذف</button>
+            <button class="btn btn-primary view-order" data-id="${escapeHtml(order.id)}">عرض</button>
+            ${canManage ? `<button class="btn btn-danger delete-order" data-id="${escapeHtml(order.id)}">حذف</button>` : ''}
           </td>
         `;
         table.appendChild(row);
       });
-      
-      document.querySelectorAll('.view-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          viewOrder(parseInt(this.dataset.id));
-        });
-      });
-      
-      document.querySelectorAll('.delete-order').forEach(btn => {
-        btn.addEventListener('click', function() {
-          deleteOrder(parseInt(this.dataset.id));
-        });
-      });
+    }
+
+    // تنفيذ إجراء على طلب عبر الخادم ثم تحديث كل الشاشات
+    async function runOrderAction(request, successMessage, fallbackError) {
+      if (!checkPermission(PERM.ORDERS_MANAGE)) {
+        showNotification('ليس لديك صلاحية لإدارة الطلبات', 'error');
+        return;
+      }
+      try {
+        await request();
+        showNotification(successMessage, 'success');
+      } catch (err) {
+        showApiError(err, fallbackError);
+      }
+      // نحدّث في الحالتين: قد يكون مستخدم آخر غيّر الطلب أو المخزون
+      await refreshAndRender();
     }
 
     function completeOrder(orderId) {
       if (!confirm('هل أنت متأكد من أن الطلبية قد تم تجهيزها؟ سيتم خصم المواد من المخزون.')) return;
-      
-      const orderIndex = orders.findIndex(order => order.id === orderId);
-      if (orderIndex === -1) return;
-      
-      const order = orders[orderIndex];
-      
-      // التحقق من توفر المخزون
-      for (const item of order.items) {
-        const product = products.find(p => p.id === item.id);
-        if (!product || product.stock < item.quantity) {
-          showNotification(`الكمية غير كافية من ${item.name}`, 'error');
-          return;
-        }
-      }
-      
-      // خصم المواد من المخزون
-      order.items.forEach(item => {
-        const product = products.find(p => p.id === item.id);
-        if (product) {
-          product.stock -= item.quantity;
-        }
-      });
-      
-      // تحديث حالة الطلب
-      orders[orderIndex].status = 'مكتمل';
-      orders[orderIndex].completedDate = new Date().toISOString().split('T')[0];
-      
-      localStorage.setItem('products', JSON.stringify(products));
-      localStorage.setItem('orders', JSON.stringify(orders));
-      
-      loadOrders();
-      updateStats();
-      showNotification('تم تحديث حالة الطلبية إلى مكتملة', 'success');
+      return runOrderAction(
+        () => api(`/orders/${orderId}/complete`, { method: 'POST' }),
+        'تم تحديث حالة الطلبية إلى مكتملة', 'تعذّر تجهيز الطلبية');
     }
 
     function returnOrder(orderId) {
       if (!confirm('هل أنت متأكد من استرجاع هذه الطلبية؟ سيتم إعادة المواد إلى المخزون.')) return;
-      
-      const orderIndex = orders.findIndex(order => order.id === orderId);
-      if (orderIndex === -1) return;
-      
-      const order = orders[orderIndex];
-      
-      // إعادة المواد إلى المخزون
-      order.items.forEach(item => {
-        const product = products.find(p => p.id === item.id);
-        if (product) {
-          product.stock += item.quantity;
-        }
-      });
-      
-      // تحديث حالة الطلب
-      orders[orderIndex].status = 'مسترجعة';
-      orders[orderIndex].returnedDate = new Date().toISOString().split('T')[0];
-      
-      localStorage.setItem('products', JSON.stringify(products));
-      localStorage.setItem('orders', JSON.stringify(orders));
-      
-      loadOrders();
-      updateStats();
-      showNotification('تم استرجاع الطلبية وإعادة المواد إلى المخزون', 'success');
+      return runOrderAction(
+        () => api(`/orders/${orderId}/return`, { method: 'POST' }),
+        'تم استرجاع الطلبية وإعادة المواد إلى المخزون', 'تعذّر استرجاع الطلبية');
     }
 
     function deleteOrder(orderId) {
       if (!confirm('هل أنت متأكد من حذف هذه الطلبية؟')) return;
-      
-      orders = orders.filter(order => order.id !== orderId);
-      localStorage.setItem('orders', JSON.stringify(orders));
-      loadOrders();
-      updateStats();
-      showNotification('تم حذف الطلبية', 'success');
+      return runOrderAction(
+        () => api(`/orders/${orderId}`, { method: 'DELETE' }),
+        'تم حذف الطلبية', 'تعذّر حذف الطلبية');
     }
 
     function viewOrder(orderId) {
@@ -1763,14 +2430,15 @@
       products.forEach(product => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td><img src="${normalizeImageUrl(product.image)}" style="width:50px;height:50px;object-fit:cover" alt="${product.name}"></td>
-          <td>${product.name}</td>
-          <td>${product.type}</td>
-          <td>${product.price} د.ع</td>
-          <td>${product.stock}</td>
+          <td><img src="${escapeHtml(normalizeImageUrl(product.image))}" style="width:50px;height:50px;object-fit:cover" alt="${escapeHtml(product.name)}"></td>
+          <td>${escapeHtml(product.name)}</td>
+          <td>${escapeHtml(product.type)}</td>
+          <td>${escapeHtml(product.price)} د.ع</td>
+          <td>${escapeHtml(product.stock)}${product.expiredStock > 0 ? ` <span class="expiry-tag expiry-expired">+${escapeHtml(product.expiredStock)} منتهي</span>` : ''}</td>
+          <td>${product.nearestExpiry ? expiryTag(product.nearestExpiry) : '—'}</td>
           <td>
-            <button class="btn btn-primary edit-medicine" data-id="${product.id}">تعديل</button>
-            <button class="btn btn-danger delete-medicine" data-id="${product.id}">حذف</button>
+            ${checkPermission(PERM.PRODUCTS_WRITE) ? `<button class="btn btn-primary edit-medicine" data-id="${escapeHtml(product.id)}">تعديل</button>` : ''}
+            ${checkPermission(PERM.PRODUCTS_DELETE) ? `<button class="btn btn-danger delete-medicine" data-id="${escapeHtml(product.id)}">حذف</button>` : ''}
           </td>
         `;
         table.appendChild(row);
@@ -1797,8 +2465,90 @@
       document.getElementById('edit-medicine-name').value = product.name;
       document.getElementById('edit-medicine-type').value = product.type;
       document.getElementById('edit-medicine-price').value = product.price;
-      document.getElementById('edit-medicine-stock').value = product.stock;
+      document.getElementById('edit-medicine-image').value = '';
+      renderEditBatches();
       document.getElementById('edit-medicine-modal').style.display = 'flex';
+    }
+
+    // ===== إدارة الدفعات داخل نافذة التعديل (كل عملية تُحفظ فوراً على الخادم) =====
+    function renderEditBatches() {
+      const product = products.find(p => p.id === currentEditingMedicineId);
+      const table = document.getElementById('edit-batches-table');
+      if (!product) { table.innerHTML = ''; return; }
+      const batches = product.batches || [];
+      if (batches.length === 0) {
+        table.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666">لا توجد دفعات؛ أضف دفعة بالأسفل</td></tr>';
+        return;
+      }
+      table.innerHTML = batches.map(b => `
+        <tr class="${b.expired ? 'batch-expired-row' : ''}" data-batch-id="${escapeHtml(b.id)}">
+          <td><input class="form-control batch-no" value="${escapeHtml(b.batchNo)}" maxlength="50" dir="ltr" placeholder="—"></td>
+          <td><input class="form-control batch-expiry" type="date" value="${escapeHtml(b.expiryDate || '')}"></td>
+          <td><input class="form-control batch-qty" type="number" min="0" value="${escapeHtml(b.quantity)}" style="width:80px"></td>
+          <td>${expiryTag(b.expiryDate)}</td>
+          <td style="white-space:nowrap">
+            <button type="button" class="btn btn-success save-batch" title="حفظ"><i class="fas fa-save"></i> حفظ</button>
+            <button type="button" class="btn btn-danger delete-batch" title="حذف"><i class="fas fa-trash"></i> حذف</button>
+          </td>
+        </tr>`).join('');
+    }
+
+    /** ينفّذ عملية على دفعة ثم يحدّث البيانات والنافذة. */
+    async function runBatchRequest(path, options, successMessage) {
+      let ok = false;
+      try {
+        await api(`/products/${currentEditingMedicineId}/batches${path}`, options);
+        showNotification(successMessage, 'success');
+        ok = true;
+      } catch (err) {
+        showApiError(err, 'تعذّر حفظ الدفعة');
+      }
+      await refreshAndRender();
+      renderEditBatches();
+      return ok;
+    }
+
+    function confirmPastExpiry(dateStr) {
+      const days = daysUntil(dateStr);
+      return days === null || days >= 0 || confirm('تاريخ الانتهاء في الماضي، وهذه الكمية لن تُباع. هل تريد المتابعة؟');
+    }
+
+    function handleBatchTableClick(e) {
+      const btn = e.target.closest('button');
+      const row = e.target.closest('tr[data-batch-id]');
+      if (!btn || !row) return;
+      const batchId = row.dataset.batchId;
+      if (btn.classList.contains('save-batch')) {
+        const quantity = parseInt(row.querySelector('.batch-qty').value, 10);
+        const expiryDate = row.querySelector('.batch-expiry').value;
+        if (!Number.isInteger(quantity) || quantity < 0) {
+          showNotification('الكمية يجب أن تكون عدداً صحيحاً (0 أو أكثر)', 'error');
+          return;
+        }
+        if (!confirmPastExpiry(expiryDate)) return;
+        runBatchRequest(`/${batchId}`, {
+          method: 'PATCH',
+          body: { batchNo: row.querySelector('.batch-no').value.trim(), expiryDate, quantity }
+        }, 'تم حفظ الدفعة');
+      } else if (btn.classList.contains('delete-batch')) {
+        if (!confirm('حذف هذه الدفعة وكل كميتها من المخزون؟ (مثلاً بعد إتلاف دفعة منتهية)')) return;
+        runBatchRequest(`/${batchId}`, { method: 'DELETE' }, 'تم حذف الدفعة');
+      }
+    }
+
+    async function addBatch() {
+      const quantity = parseInt(document.getElementById('new-batch-qty').value, 10);
+      const expiryDate = document.getElementById('new-batch-expiry').value;
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        showNotification('أدخل كمية الدفعة الجديدة', 'error');
+        return;
+      }
+      if (!confirmPastExpiry(expiryDate)) return;
+      const ok = await runBatchRequest('', {
+        method: 'POST',
+        body: { batchNo: document.getElementById('new-batch-no').value.trim(), expiryDate, quantity }
+      }, 'تمت إضافة الدفعة');
+      if (ok) ['new-batch-no', 'new-batch-expiry', 'new-batch-qty'].forEach(id => { document.getElementById(id).value = ''; });
     }
 
     function closeEditModal() {
@@ -1806,91 +2556,77 @@
       currentEditingMedicineId = null;
     }
 
-    function saveMedicineEdit() {
+    async function saveMedicineEdit() {
       if (!currentEditingMedicineId) return;
-      
+
       const name = document.getElementById('edit-medicine-name').value.trim();
       const type = document.getElementById('edit-medicine-type').value.trim();
       const price = parseFloat(document.getElementById('edit-medicine-price').value) || 0;
-      const stock = parseInt(document.getElementById('edit-medicine-stock').value) || 0;
+      const stock = 0; // الكميات تُدار من قسم الدفعات
       const imageInput = document.getElementById('edit-medicine-image');
 
-      // التحقق من الصلاحيات
-      if (!checkPermission('edit')) {
+      if (!checkPermission(PERM.PRODUCTS_WRITE)) {
         showNotification('ليس لديك صلاحية لتعديل المنتجات', 'error');
         return;
       }
 
-      // التحقق من صحة البيانات
       const validationErrors = validateProductData({ name, price, stock });
       if (validationErrors.length > 0) {
         validationErrors.forEach(error => showNotification(error, 'error'));
         return;
       }
-
       if (!name || !type || price <= 0 || stock < 0) {
         showNotification('يرجى ملء جميع الحقول بشكل صحيح', 'error');
         return;
       }
-      
-      const productIndex = products.findIndex(p => p.id === currentEditingMedicineId);
-      if (productIndex === -1) return;
 
-      if (imageInput && imageInput.files && imageInput.files[0]) {
-        compressImage(imageInput.files[0], 1200, 1200, 0.75)
-          .then(dataUrl => updateProduct(productIndex, name, type, price, stock, dataUrl || products[productIndex].image))
-          .catch(() => {
-            const reader = new FileReader();
-            reader.onload = e => updateProduct(productIndex, name, type, price, stock, e.target.result);
-            reader.readAsDataURL(imageInput.files[0]);
-          });
-      } else {
-        updateProduct(productIndex, name, type, price, stock, products[productIndex].image);
+      const btn = document.getElementById('save-medicine-changes');
+      btn.disabled = true;
+      try {
+        const file = imageInput && imageInput.files && imageInput.files[0];
+        const form = await buildProductForm(name, type, price, stock, file);
+        form.delete('stock');
+        await api(`/products/${currentEditingMedicineId}`, { method: 'PUT', body: form });
+        closeEditModal();
+        await refreshAndRender();
+        showNotification('تم تحديث الدواء بنجاح', 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر تحديث الدواء');
+      } finally {
+        btn.disabled = false;
       }
     }
 
-    function updateProduct(index, name, type, price, stock, image) {
-      products[index] = {
-        ...products[index],
-        name: name,
-        type: type,
-        price: price,
-        stock: stock,
-        image: image
-      };
-      
-      localStorage.setItem('products', JSON.stringify(products));
-      loadProducts();
-      loadManageMedicines();
-      closeEditModal();
-      updateStats();
-      showNotification('تم تحديث الدواء بنجاح', 'success');
-    }
-
-    function deleteMedicine(productId) {
-      if (!checkPermission('delete')) {
+    async function deleteMedicine(productId) {
+      if (!checkPermission(PERM.PRODUCTS_DELETE)) {
         showNotification('ليس لديك صلاحية لحذف المنتجات', 'error');
         return;
       }
-      
-      if (!confirm('هل أنت متأكد من حذف هذا الدواء؟')) return;
-      
-      products = products.filter(p => p.id !== productId);
-      localStorage.setItem('products', JSON.stringify(products));
-      loadProducts();
-      loadManageMedicines();
-      updateStats();
-      showNotification('تم حذف الدواء بنجاح', 'success');
+      if (!confirm('هل أنت متأكد من حذف هذا الدواء؟ (الطلبات القديمة تحتفظ باسمه وسعره)')) return;
+      try {
+        await api(`/products/${productId}`, { method: 'DELETE' });
+        cart = cart.filter(item => item.id !== productId);
+        safeSave('cart', cart);
+        showNotification('تم حذف الدواء بنجاح', 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر حذف الدواء');
+      }
+      await refreshAndRender();
     }
 
     // الإحصائيات والتقارير
     function updateStats() {
       document.getElementById('total-products').textContent = products.length;
-      document.getElementById('pending-orders').textContent = orders.filter(o => o.status === 'معلق').length;
-      document.getElementById('low-stock').textContent = products.filter(p => p.stock < 10).length;
+      document.getElementById('pending-orders').textContent = orders.filter(o => o.status === STATUS.PENDING).length;
+      document.getElementById('low-stock').textContent = products.filter(isLowStock).length;
+      const expiryBatches = getExpiryBatches();
+      const countProducts = state => new Set(expiryBatches.filter(x => x.info.state === state).map(x => x.product.id)).size;
+      document.getElementById('near-expiry-count').textContent = countProducts('soon');
+      document.getElementById('expired-count').textContent = countProducts('expired');
+      document.querySelectorAll('.expiry-days-label').forEach(el => { el.textContent = EXPIRY_WARNING_DAYS; });
       
       const totalSales = orders
-        .filter(order => order.status === 'مكتمل')
+        .filter(order => order.status === STATUS.COMPLETED)
         .reduce((sum, order) => {
           return sum + order.items.reduce((orderSum, item) => orderSum + (item.price * item.quantity), 0);
         }, 0);
@@ -1905,12 +2641,12 @@
         let statusColor = '';
         
         if (product.stock === 0) {
-          status = 'نافذ';
+          status = product.expiredStock > 0 ? 'نافذ (المتبقي منتهي)' : 'نافذ';
           statusColor = 'red';
-        } else if (product.stock < 5) {
+        } else if (product.stock < CRITICAL_STOCK_THRESHOLD) {
           status = 'منخفض جداً';
           statusColor = 'red';
-        } else if (product.stock < 10) {
+        } else if (product.stock < LOW_STOCK_THRESHOLD) {
           status = 'منخفض';
           statusColor = 'orange';
         } else if (product.stock < 20) {
@@ -1923,11 +2659,13 @@
         
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${product.name}</td>
-          <td>${product.type}</td>
-          <td>${product.price} د.ع</td>
-          <td>${product.stock}</td>
+          <td>${escapeHtml(product.name)}</td>
+          <td>${escapeHtml(product.type)}</td>
+          <td>${escapeHtml(product.price)} د.ع</td>
+          <td>${escapeHtml(product.stock)}</td>
           <td style="color:${statusColor};font-weight:bold">${status}</td>
+          <td>${product.nearestExpiry ? expiryTag(product.nearestExpiry) : '—'}</td>
+          <td>${product.expiredStock > 0 ? `<span class="expiry-tag expiry-expired">${escapeHtml(product.expiredStock)}</span>` : '—'}</td>
         `;
         inventoryTable.appendChild(row);
       });
@@ -1942,22 +2680,22 @@
         let statusBadge = '';
         
         switch(order.status) {
-          case 'معلق':
+          case STATUS.PENDING:
             statusBadge = '<span class="status-badge status-pending">معلق</span>';
             break;
-          case 'مكتمل':
+          case STATUS.COMPLETED:
             statusBadge = '<span class="status-badge status-completed">مكتمل</span>';
             break;
-          case 'مسترجعة':
+          case STATUS.RETURNED:
             statusBadge = '<span class="status-badge status-returned">مسترجعة</span>';
             break;
         }
         
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.pharmacy}</td>
-          <td>${order.date}</td>
+          <td>${escapeHtml(order.id)}</td>
+          <td>${escapeHtml(order.pharmacy)}</td>
+          <td>${escapeHtml(order.date)}</td>
           <td>${total.toFixed(2)} د.ع</td>
           <td>${statusBadge}</td>
         `;
@@ -1967,7 +2705,7 @@
 
     // نظام التقارير المحسن
     function generateReport() {
-      if (!checkPermission('reports')) {
+      if (!checkPermission(PERM.REPORTS)) {
         showNotification('ليس لديك صلاحية لعرض التقارير', 'error');
         return;
       }
@@ -1986,6 +2724,7 @@
         topSelling: document.getElementById('report-top-selling').checked,
         leastSelling: document.getElementById('report-least-selling').checked,
         lowStock: document.getElementById('report-low-stock').checked,
+        expiry: document.getElementById('report-expiry').checked,
         totalProducts: document.getElementById('report-total-products').checked,
         totalSales: document.getElementById('report-total-sales').checked,
         charts: document.getElementById('report-charts').checked
@@ -2067,12 +2806,12 @@
           salesData.forEach(order => {
             reportHTML += `
               <tr>
-                <td>${order.id}</td>
-                <td>${order.pharmacy}</td>
-                <td>${order.date}</td>
-                <td>${order.itemsCount}</td>
+                <td>${escapeHtml(order.id)}</td>
+                <td>${escapeHtml(order.pharmacy)}</td>
+                <td>${escapeHtml(order.date)}</td>
+                <td>${escapeHtml(order.itemsCount)}</td>
                 <td>${order.total.toFixed(2)} د.ع</td>
-                <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+                <td><span class="status-badge ${getStatusClass(order.status)}">${escapeHtml(statusLabel(order.status))}</span></td>
               </tr>
             `;
           });
@@ -2111,9 +2850,9 @@
             reportHTML += `
               <tr>
                 <td>${index + 1}</td>
-                <td>${product.name}</td>
-                <td>${product.type}</td>
-                <td>${product.totalQuantity}</td>
+                <td>${escapeHtml(product.name)}</td>
+                <td>${escapeHtml(product.type)}</td>
+                <td>${escapeHtml(product.totalQuantity)}</td>
                 <td>${product.totalSales.toFixed(2)} د.ع</td>
               </tr>
             `;
@@ -2132,7 +2871,7 @@
         reportHTML += '<div class="report-section">';
         reportHTML += '<h3><i class="fas fa-exclamation-triangle"></i> الأدوية منخفضة المخزون</h3>';
         
-        const lowStockProducts = products.filter(p => p.stock < 10);
+        const lowStockProducts = products.filter(isLowStock);
         
         if (lowStockProducts.length > 0) {
           reportHTML += `
@@ -2156,7 +2895,7 @@
             if (product.stock === 0) {
               status = 'نافذ';
               statusColor = 'red';
-            } else if (product.stock < 5) {
+            } else if (product.stock < CRITICAL_STOCK_THRESHOLD) {
               status = 'منخفض جداً';
               statusColor = 'red';
             } else {
@@ -2166,10 +2905,10 @@
             
             reportHTML += `
               <tr>
-                <td>${product.name}</td>
-                <td>${product.type}</td>
-                <td>${product.price} د.ع</td>
-                <td>${product.stock}</td>
+                <td>${escapeHtml(product.name)}</td>
+                <td>${escapeHtml(product.type)}</td>
+                <td>${escapeHtml(product.price)} د.ع</td>
+                <td>${escapeHtml(product.stock)}</td>
                 <td style="color: ${statusColor}; font-weight: bold;">${status}</td>
               </tr>
             `;
@@ -2183,6 +2922,32 @@
         reportHTML += '</div>';
       }
       
+      // الدفعات المنتهية والقريبة من الانتهاء
+      if (reportTypes.expiry) {
+        reportHTML += '<div class="report-section">';
+        reportHTML += `<h3><i class="fas fa-hourglass-half"></i> الدفعات المنتهية والتي تنتهي خلال ${EXPIRY_WARNING_DAYS} يوماً</h3>`;
+        const expiryRows = getExpiryBatches();
+        if (expiryRows.length > 0) {
+          reportHTML += `
+            <table class="report-table">
+              <thead><tr><th>اسم الدواء</th><th>رقم الدفعة</th><th>تاريخ الانتهاء</th><th>الكمية</th><th>القيمة</th></tr></thead>
+              <tbody>
+              ${expiryRows.map(({ product, batch }) => `
+                <tr>
+                  <td>${escapeHtml(product.name)}</td>
+                  <td dir="ltr" style="text-align:right">${escapeHtml(batch.batchNo || '—')}</td>
+                  <td>${expiryTag(batch.expiryDate)}</td>
+                  <td>${escapeHtml(batch.quantity)}</td>
+                  <td>${(product.price * batch.quantity).toFixed(2)} د.ع</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>`;
+        } else {
+          reportHTML += '<p style="text-align: center; color: #666; padding: 20px;">لا توجد دفعات منتهية أو قريبة من الانتهاء</p>';
+        }
+        reportHTML += '</div>';
+      }
+
       // إضافة الرسوم البيانية إذا تم اختيارها
       if (reportTypes.charts) {
         reportHTML += generateCharts(startDate, endDate);
@@ -2199,11 +2964,11 @@
       
       return {
         totalProducts: products.length,
-        lowStockProducts: products.filter(p => p.stock < 10).length,
-        completedOrders: filteredOrders.filter(o => o.status === 'مكتمل').length,
-        pendingOrders: filteredOrders.filter(o => o.status === 'معلق').length,
+        lowStockProducts: products.filter(isLowStock).length,
+        completedOrders: filteredOrders.filter(o => o.status === STATUS.COMPLETED).length,
+        pendingOrders: filteredOrders.filter(o => o.status === STATUS.PENDING).length,
         totalSales: filteredOrders
-          .filter(o => o.status === 'مكتمل')
+          .filter(o => o.status === STATUS.COMPLETED)
           .reduce((sum, order) => sum + order.items.reduce((orderSum, item) => 
             orderSum + (item.price * item.quantity), 0), 0)
       };
@@ -2224,10 +2989,15 @@
     }
 
     function getTopSellingProducts(startDate, endDate) {
+      return getProductSalesTotals(startDate, endDate).slice(0, 10);
+    }
+
+    // كل الأدوية المباعة في الفترة مرتبة تنازلياً حسب الكمية
+    function getProductSalesTotals(startDate, endDate) {
       const productSales = {};
       
       orders
-        .filter(order => order.status === 'مكتمل' && order.date >= startDate && order.date <= endDate)
+        .filter(order => order.status === STATUS.COMPLETED && order.date >= startDate && order.date <= endDate)
         .forEach(order => {
           order.items.forEach(item => {
             if (!productSales[item.id]) {
@@ -2245,15 +3015,14 @@
         });
       
       return Object.values(productSales)
-        .sort((a, b) => b.totalQuantity - a.totalQuantity)
-        .slice(0, 10);
+        .sort((a, b) => b.totalQuantity - a.totalQuantity);
     }
 
     function getStatusClass(status) {
       switch(status) {
-        case 'مكتمل': return 'status-completed';
-        case 'معلق': return 'status-pending';
-        case 'مسترجعة': return 'status-returned';
+        case STATUS.COMPLETED: return 'status-completed';
+        case STATUS.PENDING: return 'status-pending';
+        case STATUS.RETURNED: return 'status-returned';
         default: return 'status-pending';
       }
     }
@@ -2387,13 +3156,180 @@
       printWindow.document.close();
     }
 
-    function exportReportToExcel() {
-      showNotification('سيتم إضافة خاصية التصدير لاحقاً', 'info');
+    // ===== تصدير التقرير إلى Excel =====
+    // تُحمَّل مكتبة SheetJS عند الضغط على الزر فقط، وإن تعذّر تحميلها (بدون إنترنت) نصدّر CSV يفتحه Excel.
+    const SHEETJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    let sheetJsPromise = null;
+
+    function loadSheetJS() {
+      if (window.XLSX) return Promise.resolve(window.XLSX);
+      if (!sheetJsPromise) {
+        sheetJsPromise = new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = SHEETJS_URL;
+          script.onload = () => (window.XLSX ? resolve(window.XLSX) : reject(new Error('XLSX not available')));
+          script.onerror = () => { sheetJsPromise = null; reject(new Error('تعذّر تحميل مكتبة Excel')); };
+          document.head.appendChild(script);
+        });
+      }
+      return sheetJsPromise;
+    }
+
+    // يبني أوراق التقرير كمصفوفات (صف العناوين أولاً) حسب الخيارات المحددة في صفحة التقارير
+    function buildReportSheets(startDate, endDate) {
+      const opts = {
+        sales: document.getElementById('report-sales').checked,
+        returns: document.getElementById('report-returns').checked,
+        topSelling: document.getElementById('report-top-selling').checked,
+        leastSelling: document.getElementById('report-least-selling').checked,
+        lowStock: document.getElementById('report-low-stock').checked,
+        expiry: document.getElementById('report-expiry').checked,
+        totalProducts: document.getElementById('report-total-products').checked,
+        totalSales: document.getElementById('report-total-sales').checked
+      };
+      const sheets = [];
+
+      const stats = calculateGeneralStats(startDate, endDate);
+      const summary = [['البند', 'القيمة'], ['الفترة', `${startDate} إلى ${endDate}`], ['تاريخ التقرير', todayISO()]];
+      if (opts.totalProducts) {
+        summary.push(['إجمالي الأدوية', stats.totalProducts]);
+        summary.push(['أدوية منخفضة المخزون', stats.lowStockProducts]);
+      }
+      if (opts.totalSales) {
+        summary.push(['الطلبات المكتملة', stats.completedOrders]);
+        summary.push(['الطلبات المعلقة', stats.pendingOrders]);
+        summary.push(['إجمالي المبيعات (د.ع)', stats.totalSales]);
+      }
+      sheets.push({ name: 'ملخص', rows: summary });
+
+      if (opts.sales) {
+        const rows = [['رقم الطلب', 'الصيدلية', 'التاريخ', 'عدد القطع', 'المبلغ (د.ع)', 'الحالة']];
+        getSalesData(startDate, endDate).forEach(o =>
+          rows.push([o.id, o.pharmacy, o.date, o.itemsCount, o.total, statusLabel(o.status)]));
+        sheets.push({ name: 'المبيعات', rows });
+      }
+
+      if (opts.returns) {
+        const rows = [['رقم الطلب', 'الصيدلية', 'تاريخ الطلب', 'تاريخ الاسترجاع', 'المبلغ (د.ع)']];
+        orders
+          .filter(o => o.status === STATUS.RETURNED && o.date >= startDate && o.date <= endDate)
+          .forEach(o => rows.push([
+            o.id, o.pharmacy, o.date, o.returnedDate || '',
+            o.items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+          ]));
+        sheets.push({ name: 'المسترجع', rows });
+      }
+
+      if (opts.topSelling || opts.leastSelling) {
+        const all = getProductSalesTotals(startDate, endDate);
+        const header = ['#', 'اسم الدواء', 'النوع', 'الكمية المباعة', 'إجمالي المبيعات (د.ع)'];
+        const toRows = list => [header, ...list.map((p, i) => [i + 1, p.name, p.type, p.totalQuantity, p.totalSales])];
+        if (opts.topSelling) sheets.push({ name: 'الأكثر مبيعاً', rows: toRows(all.slice(0, 10)) });
+        if (opts.leastSelling) sheets.push({ name: 'الأقل مبيعاً', rows: toRows(all.slice().reverse().slice(0, 10)) });
+      }
+
+      if (opts.lowStock) {
+        const rows = [['اسم الدواء', 'النوع', 'السعر (د.ع)', 'الكمية المتاحة', 'حالة المخزون']];
+        products.filter(isLowStock).forEach(p => rows.push([
+          p.name, p.type, p.price, p.stock,
+          p.stock === 0 ? 'نافذ' : p.stock < CRITICAL_STOCK_THRESHOLD ? 'منخفض جداً' : 'منخفض'
+        ]));
+        sheets.push({ name: 'منخفض المخزون', rows });
+      }
+
+      if (opts.expiry) {
+        const rows = [['اسم الدواء', 'رقم الدفعة', 'تاريخ الانتهاء', 'الأيام المتبقية', 'الكمية', 'القيمة (د.ع)', 'الحالة']];
+        getExpiryBatches().forEach(({ product, batch, info }) => rows.push([
+          product.name, batch.batchNo, batch.expiryDate, info.days, batch.quantity, product.price * batch.quantity,
+          info.state === 'expired' ? 'منتهية' : 'قريبة الانتهاء'
+        ]));
+        sheets.push({ name: 'الصلاحية', rows });
+      }
+
+      return sheets;
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function exportSheetsAsCsv(sheets, baseName) {
+      const cell = v => {
+        const t = String(v ?? '');
+        // منع حقن الصيغ في Excel (= + - @) وتغليف الخلايا التي تحتوي فواصل أو علامات اقتباس
+        const safe = /^[=+\-@]/.test(t) && isNaN(Number(t)) ? "'" + t : t;
+        return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+      };
+      const lines = [];
+      sheets.forEach((sheet, idx) => {
+        if (idx > 0) lines.push('');
+        lines.push(cell(sheet.name));
+        sheet.rows.forEach(row => lines.push(row.map(cell).join(',')));
+      });
+      // BOM حتى يتعرّف Excel على الترميز العربي UTF-8
+      downloadBlob(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }), `${baseName}.csv`);
+    }
+
+    async function exportReportToExcel() {
+      if (!checkPermission(PERM.REPORTS)) {
+        showNotification('ليس لديك صلاحية لتصدير التقارير', 'error');
+        return;
+      }
+      const startDate = document.getElementById('report-start-date').value;
+      const endDate = document.getElementById('report-end-date').value;
+      if (!startDate || !endDate) {
+        showNotification('يرجى تحديد تاريخ البدء والانتهاء', 'error');
+        return;
+      }
+      if (startDate > endDate) {
+        showNotification('تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء', 'error');
+        return;
+      }
+
+      const sheets = buildReportSheets(startDate, endDate);
+      // اسم ملف بأحرف لاتينية: بعض المتصفحات تستبدل الأسماء العربية بـ "download"
+      const baseName = `Dijla-report_${startDate}_to_${endDate}`;
+      const btn = document.getElementById('export-report');
+      btn.disabled = true;
+
+      try {
+        const XLSX = await loadSheetJS();
+        const wb = XLSX.utils.book_new();
+        wb.Workbook = { Views: [{ RTL: true }] }; // اتجاه الأوراق من اليمين لليسار
+        sheets.forEach(sheet => {
+          const ws = XLSX.utils.aoa_to_sheet(sheet.rows);
+          ws['!cols'] = sheet.rows[0].map((_, c) => ({
+            wch: Math.min(40, Math.max(10, ...sheet.rows.map(r => String(r[c] ?? '').length + 2)))
+          }));
+          XLSX.utils.book_append_sheet(wb, ws, sheet.name.slice(0, 31));
+        });
+        XLSX.writeFile(wb, `${baseName}.xlsx`);
+        showNotification('تم تصدير التقرير إلى Excel', 'success');
+      } catch (err) {
+        console.warn('XLSX export failed, falling back to CSV', err);
+        exportSheetsAsCsv(sheets, baseName);
+        showNotification('تعذّر تحميل مكتبة Excel (لا يوجد اتصال؟) فتم التصدير بصيغة CSV', 'warning');
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     // دوال مساعدة
-    function printInvoice(order) {
-      const printWindow = window.open('', '_blank', 'width=800,height=600');
+    function printInvoice(order, existingWindow) {
+      // الطلبات المجهزة تُظهر من أي دفعة صُرف كل صنف وتاريخ انتهائها
+      const hasBatches = order.items.some(item => item.batches && item.batches.length > 0);
+      const printWindow = existingWindow || window.open('', '_blank', 'width=800,height=600');
+      if (!printWindow) {
+        showNotification('المتصفح منع فتح نافذة الفاتورة، اسمح بالنوافذ المنبثقة لهذا الموقع', 'warning');
+        return;
+      }
       const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const tax = subtotal * TAX_RATE;
       const total = subtotal + tax;
@@ -2403,7 +3339,7 @@
         <html dir="rtl">
         <head>
           <meta charset="utf-8">
-          <title>فاتورة طلبية ${order.pharmacy}</title>
+          <title>فاتورة طلبية ${escapeHtml(order.pharmacy)}</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
             .invoice-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 15px; }
@@ -2423,10 +3359,11 @@
         </head>
         <body>
           <div class="invoice-header">
-            <div class="invoice-title">طلبية ${order.pharmacy}</div>
+            <div class="invoice-title">طلبية ${escapeHtml(order.pharmacy)}</div>
             <div class="invoice-details">
-              <div>رقم الفاتورة: ${order.id}</div>
-              <div>التاريخ: ${order.date}</div>
+              <div>رقم الفاتورة: ${escapeHtml(order.id)}</div>
+              <div>التاريخ: ${escapeHtml(order.date)}</div>
+              ${order.createdBy ? `<div>المندوب: ${escapeHtml(order.createdBy)}</div>` : ''}
             </div>
           </div>
           
@@ -2438,6 +3375,7 @@
                 <th>النوع</th>
                 <th>السعر</th>
                 <th>الكمية</th>
+                ${hasBatches ? '<th>الدفعة / الانتهاء</th>' : ''}
                 <th>المجموع</th>
               </tr>
             </thead>
@@ -2445,10 +3383,12 @@
               ${order.items.map((item, index) => `
                 <tr>
                   <td>${index + 1}</td>
-                  <td>${item.name}</td>
-                  <td>${item.type}</td>
-                  <td>${item.price} د.ع</td>
-                  <td>${item.quantity}</td>
+                  <td>${escapeHtml(item.name)}</td>
+                  <td>${escapeHtml(item.type)}</td>
+                  <td>${escapeHtml(item.price)} د.ع</td>
+                  <td>${escapeHtml(item.quantity)}</td>
+                  ${hasBatches ? `<td style="font-size:12px">${(item.batches || []).map(b =>
+                    `${escapeHtml(b.batchNo || '—')} · ${escapeHtml(b.expiryDate || 'بلا تاريخ')} × ${escapeHtml(b.quantity)}`).join('<br>')}</td>` : ''}
                   <td>${(item.price * item.quantity).toFixed(2)} د.ع</td>
                 </tr>
               `).join('')}
@@ -2464,7 +3404,7 @@
           ${order.notes ? `
           <div class="notes-section">
             <h3>ملاحظات التجهيز:</h3>
-            <p>${order.notes}</p>
+            <p>${escapeHtml(order.notes)}</p>
           </div>
           ` : ''}
           
@@ -2540,14 +3480,12 @@
     }
 
     function normalizeImageUrl(url) {
-      const placeholderBase = 'https://via.placeholder.com/';
-      if (!url) return placeholderBase + '400x300?text=دواء';
+      if (!url) return PLACEHOLDER_IMAGE;
       url = String(url).trim();
-      if (/^data:/.test(url) || /^https?:\/\//.test(url)) return url;
-      // handle values like "400x300?text=دواء"
-      if (/^\d+x\d+\?.+/.test(url) || url.includes('placeholder.com')) {
-        return placeholderBase + url.replace(/^\/+/, '');
-      }
+      // روابط via.placeholder.com القديمة لم تعد تعمل: نستبدلها بالصورة المحلية
+      if (url.includes('placeholder.com') || /^\d+x\d+\?.+/.test(url)) return PLACEHOLDER_IMAGE;
+      if (/^data:image\//.test(url) || /^https?:\/\//.test(url)) return url;
+      if (/^(javascript|data|vbscript):/i.test(url)) return PLACEHOLDER_IMAGE;
       // if starts with "/" use origin, else avoid creating invalid host for numeric placeholders
       if (url.startsWith('/')) return location.origin + url;
       // fallback: treat as relative path (don't prefix "https://" blindly)
@@ -2602,54 +3540,49 @@
       });
     }
 
-    // وظائف النسخ الاحتياطي والاستعادة
-    function backupData() {
-      if (!checkPermission('backup')) {
+    // وظائف النسخ الاحتياطي والاستعادة (على الخادم)
+    async function backupData() {
+      if (!checkPermission(PERM.BACKUP)) {
         showNotification('ليس لديك صلاحية للنسخ الاحتياطي', 'error');
         return;
       }
-      
-      const data = {
-        products: products,
-        orders: orders,
-        timestamp: new Date().toISOString()
-      };
-      
-      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      showNotification('تم إنشاء نسخة احتياطية بنجاح', 'success');
+      try {
+        const data = await api('/backup');
+        // النسخة تتضمن الصور، وتُستعاد كما هي من زر "استعادة بيانات"
+        downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), `backup-${todayISO()}.json`);
+        showNotification('تم إنشاء نسخة احتياطية بنجاح', 'success');
+      } catch (err) {
+        showApiError(err, 'تعذّر إنشاء النسخة الاحتياطية');
+      }
     }
 
     function restoreData(file) {
-      if (!checkPermission('backup')) {
+      if (!checkPermission(PERM.BACKUP)) {
         showNotification('ليس لديك صلاحية لاستعادة البيانات', 'error');
         return;
       }
-      
+
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = async function(e) {
+        let data;
         try {
-          const data = JSON.parse(e.target.result);
-          if (confirm('هل أنت متأكد من استعادة البيانات؟ سيتم استبدال جميع البيانات الحالية.')) {
-            products = data.products || [];
-            orders = data.orders || [];
-            localStorage.setItem('products', JSON.stringify(products));
-            localStorage.setItem('orders', JSON.stringify(orders));
-            loadProducts();
-            loadOrders();
-            updateStats();
-            showNotification('تم استعادة البيانات بنجاح', 'success');
-          }
+          data = JSON.parse(e.target.result);
         } catch (error) {
-          showNotification('خطأ في استعادة البيانات', 'error');
+          showNotification('ملف النسخة الاحتياطية غير صالح', 'error');
+          return;
+        }
+        if (!data || !Array.isArray(data.products) || !Array.isArray(data.orders)) {
+          showNotification('ملف النسخة الاحتياطية غير صالح', 'error');
+          return;
+        }
+        if (!confirm('هل أنت متأكد من استعادة البيانات؟ سيتم استبدال جميع الأدوية والطلبات على الخادم (المستخدمون لا يتأثرون).')) return;
+        try {
+          // يقبل الخادم نسخ هذا الإصدار ونسخ الإصدار السابق (المحفوظة من المتصفح)
+          const result = await api('/restore', { method: 'POST', body: { products: data.products, orders: data.orders } });
+          await refreshAndRender();
+          showNotification(`تمت استعادة ${result.products} دواء و${result.orders} طلب`, 'success');
+        } catch (err) {
+          showApiError(err, 'خطأ في استعادة البيانات');
         }
       };
       reader.readAsText(file);
@@ -2657,10 +3590,15 @@
 
     // نظام تنبيهات المخزون المنخفض
     function checkLowStockAlerts() {
-      const lowStockProducts = products.filter(p => p.stock < 5);
-      if (lowStockProducts.length > 0) {
-        showNotification(`هناك ${lowStockProducts.length} منتج منخفض المخزون`, 'warning');
-      }
+      const parts = [];
+      const lowStockProducts = products.filter(isLowStock);
+      if (lowStockProducts.length > 0) parts.push(`${lowStockProducts.length} منتج منخفض المخزون`);
+      const expiry = getExpiryBatches();
+      const expired = expiry.filter(x => x.info.state === 'expired').length;
+      const soon = expiry.length - expired;
+      if (expired > 0) parts.push(`${expired} دفعة منتهية الصلاحية`);
+      if (soon > 0) parts.push(`${soon} دفعة تنتهي خلال ${EXPIRY_WARNING_DAYS} يوماً`);
+      if (parts.length > 0) showNotification('تنبيه: ' + parts.join(' · '), 'warning');
     }
 
     // توليد الرسوم البيانية للتقارير
@@ -2684,7 +3622,7 @@
         chartsHTML += `
           <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
             <div style="background: var(--primary-color); width: 30px; height: ${height}px; border-radius: 4px 4px 0 0;"></div>
-            <div style="margin-top: 5px; font-size: 12px;">${month}</div>
+            <div style="margin-top: 5px; font-size: 12px;">${escapeHtml(month)}</div>
             <div style="font-size: 12px; font-weight: bold;">${sales.toFixed(2)}</div>
           </div>
         `;
@@ -2704,8 +3642,8 @@
         chartsHTML += `
           <div style="margin-bottom: 10px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-              <span>${product.name}</span>
-              <span>${product.totalQuantity}</span>
+              <span>${escapeHtml(product.name)}</span>
+              <span>${escapeHtml(product.totalQuantity)}</span>
             </div>
             <div style="background: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden;">
               <div style="background: var(--success-color); height: 100%; width: ${width}%;"></div>
@@ -2734,7 +3672,7 @@
       
       // حساب المبيعات لكل شهر
       orders
-        .filter(order => order.status === 'مكتمل')
+        .filter(order => order.status === STATUS.COMPLETED)
         .forEach(order => {
           const orderDate = new Date(order.date);
           const monthYear = `${orderDate.getMonth() + 1}/${orderDate.getFullYear()}`;
